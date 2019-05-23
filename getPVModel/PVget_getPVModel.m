@@ -109,7 +109,7 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
            xtime(i)=xtime(i)+24;
         end
     end
-    observed = csvread('Target4.csv');
+    observed = csvread('Target.csv');
     boundaries =  [L_boundary, U_boundary];
     % display graph
     PVget_graph_desc(xtime, yDetermPred, observed, boundaries, 'Combined for forecast data', ci_percentage); % Combined
