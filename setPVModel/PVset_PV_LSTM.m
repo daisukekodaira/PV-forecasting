@@ -7,14 +7,14 @@ predata = input(end-96*traindays+1:end,:);
 mu = mean(predata);
 sig = std(predata); %sig= 표준편차
 dataTrainStandardized = (predata - mu) ./ sig;
-predictorscol=[5 7:11];
+predictorscol=[5 7 9:11];
 predictors=dataTrainStandardized(:,predictorscol);
 targetdata=dataTrainStandardized(:,12);
 
 XTrain=transpose(predictors);
 YTrain= transpose(targetdata);
 %% train lstm
-numFeatures = 6;
+numFeatures = 5;
 numResponses = 1;
 numHiddenUnits = 200;
 
