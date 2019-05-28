@@ -1,4 +1,4 @@
-function y = PV_kmeans(flag,input,shortTermPastData,path)
+function y = PVset_PV_kmeans(flag,input,shortTermPastData,path)
 % tic;
 % disp('Matlab demand call function')
 feature = 2:7;
