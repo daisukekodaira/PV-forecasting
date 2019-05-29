@@ -49,7 +49,7 @@ for i_loop = 1:1:3
                     kkk_stop = abs(round(var(old_format_PastData(:,8:103)))); + 1;
                 else
                     kkk_start = 5;
-                    kkk_stop = 15;
+                    kkk_stop = 10;
                 end
             else
                 if var(abs(log10(var(old_format_PastData(:,8:103))))) < 0.5
@@ -57,7 +57,7 @@ for i_loop = 1:1:3
                     kkk_stop = abs(round(mean(log10(var(old_format_PastData(:,8:103)))))) + 1;
                 else
                     kkk_start = 5;
-                    kkk_stop = 15;
+                    kkk_stop = 10;
                 end
             end
             
@@ -124,7 +124,7 @@ for i_loop = 1:1:3
                 raw_30_ForecastData(j+(i-1)*96,1) = result_cluster_1D_day_array{kkk}(i,j);
             end
         end
-        err_PastData(:,1:11) = new_format_PastData(1+m_raw_70_PastData*96:end,1:11);
+        err_PastData(:,1:11) = new_format_PastData(end-size(new_result_err_data,1)+1:end,1:11);
         err_PastData(:,12) = new_result_err_data;
         % save name
         building_num = num2str(PastDataExcelFile(2,1));
