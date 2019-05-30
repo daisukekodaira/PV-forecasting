@@ -9,7 +9,7 @@ function target = PVset_fitnet_ANN(flag,input,shortTermPastData,path)
 if flag == 1
     PastDataExcelFile_ANN = input;
     PastData_ANN = PastDataExcelFile_ANN(1:(end-96*7),:);    % PastData load
-%     PastData_ANN(~any(PastData_ANN(:,12),2),:) = [];         % if there is 0 value in generation column -> delete
+    PastData_ANN(~any(PastData_ANN(:,12),2),:) = [];         % if there is 0 value in generation column -> delete
     [m_PastData_ANN, ~] = size(PastData_ANN);
    %% Train model
     for i_loop = 1:1:3

@@ -54,7 +54,7 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     %% Prediction for test data
     predicted_PV(1).data = PVget_kmeans(op_flag, predictors, short_past_load, filepath);
     predicted_PV(2).data = PVget_fitnet_ANN(op_flag, predictors, short_past_load, filepath);
-    predicted_PV(3).data = PVget_LSTM(op_flag, predictors, short_past_load, filepath);
+%     predicted_PV(3).data = PVget_LSTM(op_flag, predictors, short_past_load, filepath);
     %% Prediction result
     for hour = 1:24
         for i = 1:size(coeff(1).data,1) % the number of prediction methods(k-means and fitnet)
@@ -63,7 +63,7 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
             else
                 yDetermPred(1+(hour-1)*4:hour*4,:) = yDetermPred(1+(hour-1)*4:hour*4,:) + coeff(hour).data(i).*predicted_PV(i).data(1+(hour-1)*4:hour*4);  
             end
-        end
+        end 
     end    
     %% Generate Result file    
     % Headers for output file
@@ -115,7 +115,7 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     PVget_graph_desc(xtime, yDetermPred, observed, boundaries, 'Combined for forecast data', ci_percentage); % Combined
     PVget_graph_desc(xtime, predicted_PV(1).data, observed, [], 'k-means for forecast data', ci_percentage); % k-means
     PVget_graph_desc(xtime, predicted_PV(2).data, observed, [], 'ANN for forecast data', ci_percentage); % k-means
-    PVget_graph_desc(xtime, predicted_PV(3).data, observed, [], 'LSTM for forecast data', ci_percentage);
+%     PVget_graph_desc(xtime, predicted_PV(3).data, observed, [], 'LSTM for forecast data', ci_percentage);
 
     % Cover Rate of PI
     count = 0;
@@ -124,7 +124,7 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
             count = count+1;
         end
     end
-    a=0;b=0;c=0;d=0;
+    a=0;b=0;c=0;
     PICoverRate = 100*count/size(observed,1);
     for i=1:size(yDetermPred,1)
     if observed(i)~=0
@@ -140,21 +140,21 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
         MAE(i,3) = (abs(predicted_PV(2).data(i) - observed(i))./observed(i));
         c=c+1;
         end
-        if predicted_PV(3).data(i)~=0
-        MAE(i,4) = (abs(predicted_PV(3).data(i) - observed(i))./observed(i));
-        d=d+1;
-        end
+%         if predicted_PV(3).data(i)~=0
+%         MAE(i,4) = (abs(predicted_PV(3).data(i) - observed(i))./observed(i));
+%         d=d+1;
+%         end
     end
     end
     MAPE(1)=sum(MAE(:,1))/a *100;
     MAPE(2)=sum(MAE(:,2))/b *100;
     MAPE(3)=sum(MAE(:,3))/c *100;
-    MAPE(4)=sum(MAE(:,4))/d *100;
+%     MAPE(4)=sum(MAE(:,4))/d *100;
     disp(['PI cover rate is ',num2str(PICoverRate), '[%]/', num2str(100*(1-ci_percentage)), '[%]'])
     disp(['MAPE of combine model: ', num2str(MAPE(1)),'[%]'])
     disp(['MAPE of kmeans: ', num2str(MAPE(2)),'[%]'])
     disp(['MAPE of ANN: ', num2str(MAPE(3)),'[%]'])
-    disp(['MAPE of LSTM: ', num2str(MAPE(4)),'[%]'])
+%     disp(['MAPE of LSTM: ', num2str(MAPE(4)),'[%]'])
    % for debugging --------------------------------------------------------------------- 
     
     flag = 1;

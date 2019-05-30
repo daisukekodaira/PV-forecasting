@@ -43,7 +43,7 @@ function flag = setPVModel(LongTermPastData)
         short_past_load = longPast(TimeIndex-96*7:TimeIndex-1, 1:end); % size of short_past_load is always "672*11" for one week data set 
         valid_predictor = valid_predictors(1+(day-1)*96:day*96, 1:end);  % predictor for 1 day (96 data instances) 
         y_ValidEstIndv(1).data(:,day) = PVset_kmeans(op_flag, valid_predictor, short_past_load, path);
-%         y_ValidEstIndv(2).data(:,day) = PVset_fitnet_ANN(op_flag, valid_predictor, short_past_load, path);
+        y_ValidEstIndv(2).data(:,day) = PVset_fitnet_ANN(op_flag, valid_predictor, short_past_load, path);
     end
     %% Optimize the coefficients for the additive model
     coeff = PVset_pso_main(y_ValidEstIndv, valid_data(:,end));  
