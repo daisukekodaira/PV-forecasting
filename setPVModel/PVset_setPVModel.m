@@ -27,7 +27,7 @@ function flag = PVset_setPVModel(LongTermPastData)
     % Note: 0 means not true. If this function got the past data, model have to be trained
     op_flag = 1; % 1: training mode
     shortPast = longPast(end-7*96+1:end, :); 
-    PVset_PV_LSTM(op_flag, longPast, shortPast, path);
+%     PVset_PV_LSTM(op_flag, longPast, shortPast, path);
     PVset_PV_kmeans(op_flag, longPast, shortPast, path);
     PVset_PV_fitnet_ANN(op_flag, longPast, shortPast, path);
     %% Validate the performance of each model
@@ -38,7 +38,7 @@ function flag = PVset_setPVModel(LongTermPastData)
         valid_predictor = valid_predictors(1+(day-1)*96:day*96, 1:end);  % predictor for 1 day (96 data instances) 
        y_ValidEstIndv(1).data(:,day) = PVset_PV_kmeans(op_flag, valid_predictor, short_past_load, path);
        y_ValidEstIndv(2).data(:,day) = PVset_PV_fitnet_ANN(op_flag, valid_predictor, short_past_load, path);
-       y_ValidEstIndv(3).data(:,day) = PVset_PV_LSTM(op_flag, valid_predictor, short_past_load, path);
+%        y_ValidEstIndv(3).data(:,day) = PVset_PV_LSTM(op_flag, valid_predictor, short_past_load, path);
     end
     %% Optimize the coefficients for the additive model
     coeff = PVset_pso_main(y_ValidEstIndv, valid_data(:,end));  

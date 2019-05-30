@@ -1,9 +1,9 @@
-function target = PV_fitnet_ANN(flag,input,shortTermPastData,path)
+function target = PVset_PV_fitnet_ANN(flag,input,shortTermPastData,path)
 % tic;
 %% set feature
 % P1(hour), P2(temp), P3(cloud), P4(solar)
     sub_feature1 = 5;
-    sub_feature2 = 7:11;
+    sub_feature2 = 9:10;
     feature = horzcat(sub_feature1,sub_feature2);
      %% PastData
 if flag == 1
