@@ -1,5 +1,4 @@
-function PVset_kmeans_Training(LongTermpastData, path)
-
+function PVset_kmeans_Train(LongTermpastData, path)
     %% Read inpudata
     train_data = LongTermpastData(~any(isnan(LongTermpastData),2),:); % Eliminate NaN from inputdata
 
@@ -12,14 +11,14 @@ function PVset_kmeans_Training(LongTermpastData, path)
     %         error_status = -1;
     %     end
 
-%     % Change the given value about "Cloud" from 2 to 1 at longTermPastData 
-%     % It is only for KEPRI database (only for SGS project) because of KEPRI's input data problem.
-%     [number_of_rows_in_the_train_data_sunlight,~] = size(train_data);
-%     for for_change_cloud_2_to_1_sunlight=1:1:number_of_rows_in_the_train_data_sunlight
-%         if  train_data(for_change_cloud_2_to_1_sunlight,10)==2
-%               train_data(for_change_cloud_2_to_1_sunlight,10)=1 ;
-%         end
-%     end
+    %     % Change the given value about "Cloud" from 2 to 1 at longTermPastData 
+    %     % It is only for KEPRI database (only for SGS project) because of KEPRI's input data problem.
+    %     [number_of_rows_in_the_train_data_sunlight,~] = size(train_data);
+    %     for for_change_cloud_2_to_1_sunlight=1:1:number_of_rows_in_the_train_data_sunlight
+    %         if  train_data(for_change_cloud_2_to_1_sunlight,10)==2
+    %               train_data(for_change_cloud_2_to_1_sunlight,10)=1 ;
+    %         end
+    %     end
     
     %% Kmeans clustering of sunlight data set
     % Extract appropriate data from inputdata for sunlight prediction

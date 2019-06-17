@@ -1,4 +1,4 @@
-function target = PVset_PV_LSTM(flag,input,shortTermPastData,path)
+function target = PVset_LSTM(flag,input,shortTermPastData,path)
 %% LOAD DATA
 traindays=7;
 if flag==1
