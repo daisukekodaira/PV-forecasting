@@ -26,5 +26,5 @@ function target = PVset_ANN_Train(LongTermpastData,path)
     save_name = '\PV_fitnet_ANN_';
     save_name = strcat(path,save_name,building_num,'.mat');
     clearvars path;
-    save(save_name);
+    save(save_name,'net_ANN_loop','feature');
 end
