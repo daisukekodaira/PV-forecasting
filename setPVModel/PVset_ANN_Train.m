@@ -1,6 +1,6 @@
 function target = PVset_ANN_Train(LongTermpastData,path)
     %% set featur
-    % P1(hour), P2(temp), P3(cloud), P4(solar)
+    % P1(hour), P2(temp), P3(cloud), 
     sub_feature1 = 5;
     sub_feature2 = 9:10;
     feature = horzcat(sub_feature1,sub_feature2);
