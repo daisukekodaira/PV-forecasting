@@ -14,7 +14,6 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     tic;
     
     %% parameters
-    op_flag = 2; % 2: forecast mode(validation)
     ci_percentage = 0.05; % 0.05 = 95% it must be between 0 to 1
     %% Load data
     if strcmp(shortTermPastData, 'NULL') == 0 || strcmp(ForecastData, 'NULL') == 0 || strcmp(ResultData, 'NULL') == 0
@@ -37,7 +36,6 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
         flag = -1;
         return
     end    
-    
     %% Load mat files
     s1 = 'PV_pso_coeff_';
     s2 = 'PV_err_distribution_';
@@ -54,7 +52,7 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     %% Prediction for test data
     predicted_PV(1).data = PVget_kmeans_Forecast(predictors, short_past_load, filepath);
     predicted_PV(2).data = PVget_ANN_Forecast(predictors, short_past_load, filepath);
-%     predicted_PV(3).data = PVget_LSTM(predictors, short_past_load, filepath);
+    %     predicted_PV(3).data = PVget_LSTM(predictors, short_past_load, filepath);
     %% Prediction result
     for hour = 1:24
         for i = 1:size(coeff(1).data,1) % the number of prediction methods(k-means and fitnet)
@@ -74,7 +72,7 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     fprintf(fid,'%s,',hedder{:});
     fprintf(fid,'\n');
 
-    % Make distribution of prediction
+    %% Make distribution of ensemble forecasting
     for i = 1:size(yDetermPred,1)
         prob_prediction(:,i) = yDetermPred(i) + err_distribution(predictors(i,5)+1, predictors(i,6)+1).data;
         prob_prediction(:,i) = max(prob_prediction(:,i), 0);    % all elements must be bigger than zero

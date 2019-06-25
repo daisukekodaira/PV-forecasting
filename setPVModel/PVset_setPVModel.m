@@ -43,8 +43,11 @@ function flag = PVset_setPVModel(LongTermPastData)
     %% Optimize the coefficients for the additive model
     coeff = PVset_pso_main(y_ValidEstIndv, valid_data(:,end));  
     
-    %% Generate probability interval using validation result
-   for hour = 1:24
+    %% Integrate individual forecasting algorithms
+    % 1. k-means byacian 
+    % 2. Neural network
+    % integrate into one ensemble forecasting model with optimal coefficients
+    for hour = 1:24
         for i = 1:size(coeff(1).data,1)
             if i == 1
                 y_est(1+(hour-1)*4:hour*4,:) = coeff(hour).data(i).*y_ValidEstIndv(i).data(1+(hour-1)*4:hour*4,:);
