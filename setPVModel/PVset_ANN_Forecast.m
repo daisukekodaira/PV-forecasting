@@ -1,11 +1,7 @@
 function target = PVset_ANN_Forecast(predictors,shortTermPastData,path)    
     %% set featur
     % P1(hour), P2(temp), P3(cloud), P4(solar)
-    sub_feature1 = 5;
-    sub_feature2 = 9:10;
-    feature = horzcat(sub_feature1,sub_feature2);
-
-    % file does not exist so use already created .mat
+    feature=[5 9 10];
     %% load .mat file
     building_num = num2str(predictors(2,1));
     load_name = '\PV_fitnet_ANN_';

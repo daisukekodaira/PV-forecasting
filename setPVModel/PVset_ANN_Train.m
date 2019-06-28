@@ -1,6 +1,6 @@
 function target = PVset_ANN_Train(LongTermpastData,path)
     %% set featur
-    % P1(hour), P2(temp), P3(cloud), P4(solar)
+    % P1(hour), P2(temp), P3(cloud), 
     sub_feature1 = 5;
     sub_feature2 = 9:10;
     feature = horzcat(sub_feature1,sub_feature2);
@@ -26,5 +26,5 @@ function target = PVset_ANN_Train(LongTermpastData,path)
     save_name = '\PV_fitnet_ANN_';
     save_name = strcat(path,save_name,building_num,'.mat');
     clearvars path;
-    save(save_name);
+    save(save_name,'net_ANN_loop','feature');
 end
