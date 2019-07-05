@@ -10,7 +10,7 @@
 %     The output of the function is "ResultData.csv"
 % ----------------------------------------------------------------------------
 
-function flag = getPVModel(shortTermPastData, ForecastData, ResultData)
+function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     tic;
     
     %% parameters
@@ -98,63 +98,63 @@ function flag = getPVModel(shortTermPastData, ForecastData, ResultData)
     fprintf(fid,['%d,', '%4d,', '%02d,', '%02d,', '%02d,', '%d,', '%f,', '%f,', '%f,', '%02d,', '%f,', '%f,', repmat('%f,',1,10) '\n'], result');
     fclose(fid);
     
-%     % for debugging --------------------------------------------------------
-%     %% Display graph
-%     % make x timestep
-%     timestep=csvread(ForecastData,1,4,[1,4,96,5]);
-%     xtime=timestep(:,1)+0.25*timestep(:,2);
-%     for i=1:size(xtime,1)
-%         if xtime(i) < xtime(1)
-%            xtime(i)=xtime(i)+24;
-%         end
-%     end
-%     observed = csvread('PV_Target_20192111345.csv');
-%     boundaries =  [L_boundary, U_boundary];
-%     % display graph
-%     PVget_graph_desc(xtime, yDetermPred, observed, boundaries, 'Combined for forecast data', ci_percentage); % Combined
-%     PVget_graph_desc(xtime, predicted_PV(1).data, observed, [], 'k-means for forecast data', ci_percentage); % k-means
-%     PVget_graph_desc(xtime, predicted_PV(2).data, observed, [], 'ANN for forecast data', ci_percentage); % k-means
-%     %     PVget_graph_desc(xtime, predicted_PV(3).data, observed, [], 'LSTM for forecast data', ci_percentage);
-% 
-%     % Cover Rate of PI
-%     count = 0;
-%     for i = 1:(size(observed,1))
-%         if (L_boundary(i)<=observed(i)) && (observed(i)<=U_boundary(i))
-%             count = count+1;
-%         end
-%     end
-%     a=0;b=0;c=0;
-%     PICoverRate = 100*count/size(observed,1);
-%     for i=1:size(yDetermPred,1)
-%         if observed(i)~=0
-%             if yDetermPred(i) ~=0
-%             MAE(i,1) = (abs(yDetermPred(i) - observed(i))./observed(i)); % combined   
-%             a=a+1;
-%             end
-%             if predicted_PV(1).data(i)~=0
-%             MAE(i,2) = (abs(predicted_PV(1).data(i) - observed(i))./observed(i));
-%             b=b+1;
-%             end
-%             if predicted_PV(2).data(i)~=0
-%             MAE(i,3) = (abs(predicted_PV(2).data(i) - observed(i))./observed(i));
-%             c=c+1;
-%             end
-%             %         if predicted_PV(3).data(i)~=0
-%             %         MAE(i,4) = (abs(predicted_PV(3).data(i) - observed(i))./observed(i));
-%             %         d=d+1;
-%             %         end
-%         end
-%     end
-% %     MAPE(1)=sum(MAE(:,1))/a *100;
-% %     MAPE(2)=sum(MAE(:,2))/b *100;
-% %     MAPE(3)=sum(MAE(:,3))/c *100;
-% %     MAPE(4)=sum(MAE(:,4))/d *100;
-%     disp(['PI cover rate is ',num2str(PICoverRate), '[%]/', num2str(100*(1-ci_percentage)), '[%]'])
-% %     disp(['MAPE of combine model: ', num2str(MAPE(1)),'[%]'])
-% %     disp(['MAPE of kmeans: ', num2str(MAPE(2)),'[%]'])
-% %     disp(['MAPE of ANN: ', num2str(MAPE(3)),'[%]'])
-% %     disp(['MAPE of LSTM: ', num2str(MAPE(4)),'[%]'])
-%    % for debugging --------------------------------------------------------------------- 
+    % for debugging --------------------------------------------------------
+    %% Display graph
+    % make x timestep
+    timestep=csvread(ForecastData,1,4,[1,4,96,5]);
+    xtime=timestep(:,1)+0.25*timestep(:,2);
+    for i=1:size(xtime,1)
+        if xtime(i) < xtime(1)
+           xtime(i)=xtime(i)+24;
+        end
+    end
+    observed = csvread('PV_Target_20192111345.csv');
+    boundaries =  [L_boundary, U_boundary];
+    % display graph
+    PVget_graph_desc(xtime, yDetermPred, observed, boundaries, 'Combined for forecast data', ci_percentage); % Combined
+    PVget_graph_desc(xtime, predicted_PV(1).data, observed, [], 'k-means for forecast data', ci_percentage); % k-means
+    PVget_graph_desc(xtime, predicted_PV(2).data, observed, [], 'ANN for forecast data', ci_percentage); % k-means
+    %     PVget_graph_desc(xtime, predicted_PV(3).data, observed, [], 'LSTM for forecast data', ci_percentage);
+
+    % Cover Rate of PI
+    count = 0;
+    for i = 1:(size(observed,1))
+        if (L_boundary(i)<=observed(i)) && (observed(i)<=U_boundary(i))
+            count = count+1;
+        end
+    end
+    a=0;b=0;c=0;
+    PICoverRate = 100*count/size(observed,1);
+    for i=1:size(yDetermPred,1)
+        if observed(i)~=0
+            if yDetermPred(i) ~=0
+            MAE(i,1) = (abs(yDetermPred(i) - observed(i))./observed(i)); % combined   
+            a=a+1;
+            end
+            if predicted_PV(1).data(i)~=0
+            MAE(i,2) = (abs(predicted_PV(1).data(i) - observed(i))./observed(i));
+            b=b+1;
+            end
+            if predicted_PV(2).data(i)~=0
+            MAE(i,3) = (abs(predicted_PV(2).data(i) - observed(i))./observed(i));
+            c=c+1;
+            end
+            %         if predicted_PV(3).data(i)~=0
+            %         MAE(i,4) = (abs(predicted_PV(3).data(i) - observed(i))./observed(i));
+            %         d=d+1;
+            %         end
+        end
+    end
+%     MAPE(1)=sum(MAE(:,1))/a *100;
+%     MAPE(2)=sum(MAE(:,2))/b *100;
+%     MAPE(3)=sum(MAE(:,3))/c *100;
+%     MAPE(4)=sum(MAE(:,4))/d *100;
+    disp(['PI cover rate is ',num2str(PICoverRate), '[%]/', num2str(100*(1-ci_percentage)), '[%]'])
+%     disp(['MAPE of combine model: ', num2str(MAPE(1)),'[%]'])
+%     disp(['MAPE of kmeans: ', num2str(MAPE(2)),'[%]'])
+%     disp(['MAPE of ANN: ', num2str(MAPE(3)),'[%]'])
+%     disp(['MAPE of LSTM: ', num2str(MAPE(4)),'[%]'])
+   % for debugging --------------------------------------------------------------------- 
     
     flag = 1;
     toc;

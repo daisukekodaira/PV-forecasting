@@ -3,7 +3,7 @@
 % 2019/02/18 Updated gyeong gak (kakkyoung2@gmail.com)
 % 2019/06/16 Updated by Daisuke Kodaira (daisuke.kodaira03@gmail.com)
 % ----------------------------------------------------------------------------
-function flag = setPVModel(LongTermPastData)
+function flag = PVset_setPVModel(LongTermPastData)
     tic;    
     %% Get file path
     path = fileparts(LongTermPastData);
