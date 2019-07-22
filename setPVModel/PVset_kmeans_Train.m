@@ -14,7 +14,8 @@ dataTrainStandardized = horzcat(Past_Load_dataData(:,1:6),dataTrainStandardized)
 %% Kmeans clustering for forecast sunlight data
 past_feature_sunlight = horzcat(dataTrainStandardized(:,2:4), dataTrainStandardized(:,9:10)); % combine 1~5 columns & 9,10 columns
 past_load_sunlight = dataTrainStandardized(:,11);
-% Set K for sunlight. 20 is experimentally chosen by gyeong gak
+% Set K for sunlight. 20 is experimentally chosen by gyeong gak. 
+% originally this value is 50
 k_sunlight = 20;
 [idx_sunlight,c_sunlight] = kmeans(past_load_sunlight,k_sunlight); % Set index ans class value using k-means
 nb_sunlight = fitcnb(past_feature_sunlight, idx_sunlight,'Distribution','kernel'); % Bayesian Classification 
@@ -31,7 +32,7 @@ if m_new_format_PastData < 96
 end
 %% Patterning data
 % 1:Building index , 2:Date, 3:Day of Week,  4:Holiday,  5:Temparature,
-%  6:Cloud, 7:SolarIrradiance,  8~102:Generation
+%  6:Cloud, 7:SolarIrradiance,  8~103:Generation
 Patterned_PastData = PVset_Format_Change(dataTrainStandardized);
 %% Train model
 Feature = 3:7;
