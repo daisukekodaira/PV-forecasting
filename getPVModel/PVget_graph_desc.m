@@ -2,13 +2,13 @@
 % This function is only for debugging
 % -------------------------------------------------------------------
 
-function PVget_graph_desc(x, y_pred, y_true, boundaries, name, ci_percentage)     
+function PVget_graph_desc(x, y_pred, y_true, boundaries, name, ci_percentage,max_xtime)     
     %% CHANGE hour and value
     %     if you want see  0 to 23 graph 
     t=0;   
     for i=1:size(x,1)
            t=t+1;
-           if x(i) == 24 % 
+           if x(i) == max_xtime 
                set_point=t;           
            end
     end

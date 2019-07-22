@@ -103,17 +103,18 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     % make x timestep
     timestep=csvread(ForecastData,1,4,[1,4,96,5]);
     xtime=timestep(:,1)+0.25*timestep(:,2);
+    max_xtime=max(xtime);
     for i=1:size(xtime,1)
         if xtime(i) < xtime(1)
            xtime(i)=xtime(i)+24;
         end
     end
-    observed = csvread('PV_Target_20192111345.csv');
+    observed = csvread('PV_Target_201902082359.csv');
     boundaries =  [L_boundary, U_boundary];
     % display graph
-    PVget_graph_desc(xtime, yDetermPred, observed, boundaries, 'Combined for forecast data', ci_percentage); % Combined
-    PVget_graph_desc(xtime, predicted_PV(1).data, observed, [], 'k-means for forecast data', ci_percentage); % k-means
-    PVget_graph_desc(xtime, predicted_PV(2).data, observed, [], 'ANN for forecast data', ci_percentage); % k-means
+    PVget_graph_desc(xtime, yDetermPred, observed, boundaries, 'Combined for forecast data', ci_percentage,max_xtime); % Combined
+    PVget_graph_desc(xtime, predicted_PV(1).data, observed, [], 'k-means for forecast data', ci_percentage,max_xtime); % k-means
+    PVget_graph_desc(xtime, predicted_PV(2).data, observed, [], 'ANN for forecast data', ci_percentage,max_xtime); % k-means
     %     PVget_graph_desc(xtime, predicted_PV(3).data, observed, [], 'LSTM for forecast data', ci_percentage);
 
     % Cover Rate of PI
