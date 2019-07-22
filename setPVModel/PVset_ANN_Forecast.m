@@ -1,4 +1,4 @@
-function target = PVget_ANN_Forecast(predictors,shortTermPastData,path)    
+function target = PVset_ANN_Forecast(predictors,shortTermPastData,path)    
     %% set featur
     % P1(hour), P2(temp), P3(cloud), P4(solar)
     sub_feature1 = 5;
@@ -27,7 +27,7 @@ function target = PVget_ANN_Forecast(predictors,shortTermPastData,path)
     end
     result_ForecastData_ANN_premean = result_ForecastData_ANN{1}+result_ForecastData_ANN{2}+result_ForecastData_ANN{3};
     result_ForecastData_ANN_mean = result_ForecastData_ANN_premean/3;
-    [result1,result2] = PVget_error_correction_sun(predictors,result_ForecastData_ANN_mean,shortTermPastData,path);
+    [result1,result2] = PVset_error_correction_sun(predictors,result_ForecastData_ANN_mean,shortTermPastData,path);
     %% ResultingData File
     ResultingData_ANN(:,1:10) = predictors(:,1:10);
     ResultingData_ANN(:,12) = result2;
