@@ -21,17 +21,22 @@ function y = format_change_1(input_data)
         end
     end
     % Feature data
-    j = 1;
+    j = 1;k=1;
     old_format_PastData(1:end,1) = new_format_PastData(1,1);
-    for i = 1:1:m_new_format_PastData
+    for i = 1:m_new_format_PastData
         if i == m_new_format_PastData
-            old_format_PastData(j,3:7) = new_format_PastData(i,7:11);
+            old_format_PastData(j,3:4) = new_format_PastData(i,7:8);
+            old_format_PastData(j,5) = max(new_format_PastData(k:i,9));
+            old_format_PastData(j,6:7) = new_format_PastData(i,10:11);
             old_format_PastData(j,2) = new_format_PastData(i,2)*10000 + new_format_PastData(i,3)*100 + new_format_PastData(i,4);
         else
-            old_format_PastData(j,3:7) = new_format_PastData(i,7:11);
+            old_format_PastData(j,3:4) = new_format_PastData(i,7:8);
+            old_format_PastData(j,5) = max(new_format_PastData(k:i,9));
+            old_format_PastData(j,6:7) = new_format_PastData(i,10:11);
             old_format_PastData(j,2) = new_format_PastData(i,2)*10000 + new_format_PastData(i,3)*100 + new_format_PastData(i,4);
                 if (new_format_PastData(i,4) - new_format_PastData((i+1),4)) ~= 0
                     j = j + 1;
+                    k=i;
                 end
         end
     end
