@@ -13,7 +13,7 @@ load(load_name,'-mat');
 %% Patterning and Standardization
 ShortData(:,1:6)=shortTermPastData(:,1:6);
 ShortData(:,7:12) = (shortTermPastData(:,7:12)-mean_value)./sig_value;
-old_format_ShortData = PVget_format_change_1(ShortData);
+old_format_ShortData = PVget_Format_Change(ShortData);
 raw_ShortData = old_format_ShortData;
 [m_raw_ShortData, ~] = size(old_format_ShortData);
 %% Finde forecast result Using K-means, Bayesian 

@@ -24,14 +24,17 @@ ForecastData(:,11)=sig_value(5).*result_nb_sunlight + mean_value(5);       % Ret
 % In PV forecast, it is much better to use patterned data
 % Count day number -> (0~23: 1 day), (8~7: 2 days)
 [m_ForecastData, ~]= size(dataForecastStandardized);
-j = 1;
+j = 1;k=1;
 % Patterning data. (if there is two day's data in forecast data, Separate data in two rows)
 for i = 1:m_ForecastData
     patterned_Forecastdata(j,1)=dataForecastStandardized(2,1);
-    patterned_Forecastdata(j,3:7) = dataForecastStandardized(i,7:11);
+    patterned_Forecastdata(j,3:4) = dataForecastStandardized(i,7:8);
+    patterned_Forecastdata(j,5)=max(dataForecastStandardized(k:i,9));
+    patterned_Forecastdata(j,6:7) = dataForecastStandardized(i,10:11);
     patterned_Forecastdata(j,2) = dataForecastStandardized(i,2)*10000 + dataForecastStandardized(i,3)*100 + dataForecastStandardized(i,4);
     if i ~= m_ForecastData && (dataForecastStandardized(i,4) - dataForecastStandardized((i+1),4)) ~= 0
         j = j + 1;
+        k=i;
     end
 end
 %% Use k-means, bayesian for predict
