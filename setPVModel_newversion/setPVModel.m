@@ -32,7 +32,6 @@ function flag = PVset_setPVModel(LongTermPastData)
     
     %% Validate the performance of each model
     for day = 1:ValidDays 
-        day
         TimeIndex = size(train_data,1)+1+96*(day-1);  % Indicator of the time instance for validation data in past_load, 
         short_past_load = longPast(TimeIndex-96*7+1:TimeIndex, 1:end); % size of short_past_load is always "672*11" for one week data set 
         valid_predictor = valid_predictors(1+(day-1)*96:day*96, 1:end);  % predictor for 1 day (96 data instances) 
@@ -76,7 +75,7 @@ function flag = PVset_setPVModel(LongTermPastData)
     end
     % build the error distibution
     for k = 1:size(err,1)
-        if isnan(err_distribution(err(k,2)+1, err(k,3)+1).data(1)) == 1 
+        if isnan(err_distribution(err(k,2)+1, err(k,3)+1).data(1)) == 1
             err_distribution(err(k,2)+1, err(k,3)+1).data(1) = err(k,1);
         else
             err_distribution(err(k,2)+1, err(k,3)+1).data(end+1) = err(k,1);

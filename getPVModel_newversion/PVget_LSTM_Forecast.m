@@ -7,7 +7,6 @@ building_num = num2str(Forecastdata(2,1));
 load_name = '\PV_LSTM_';
 load_name = strcat(path,load_name,building_num,'.mat');
 load(load_name,'-mat');
-
 %% forecast
 data=Forecastdata(:,predictorscol);
 predictors =(data - meandata(predictorscol))./sigdata(predictorscol);

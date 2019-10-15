@@ -5,7 +5,7 @@
 % 1 colunm demand -> 96 colunm demand
 % year,month,day -> 2 colunm    predictor(7~12 colunm at data)-> 3~8 
 % generation(13 colunm)- >9~104 sequence
-function y = PVset_Format_Change(input_data)
+function y = PVget_Format_Change(input_data)
     new_format_PastData = input_data;
     % check again the size of new_version_PastData because of copy
     [m_new_format_PastData, ~] = size(new_format_PastData);

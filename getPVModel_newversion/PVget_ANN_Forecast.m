@@ -1,14 +1,12 @@
-function target = PVset_ANN_Forecast(predictors,shortTermPastData,path)    
+function target = PVget_ANN_Forecast(predictors,shortTermPastData,path)    
 % Seung Hyeon made this code first 
 % 2019/10/15 modified by Gyeonggak Kim (kakkyoung2@gmail.com)
 % fix error & change predictor   
-    %% set featur
-    % P1(hour), P2(temp), P3(cloud), P4(solar)
+    %% set featuer
+    % P0(hour), P1(Humidity), P2(WindSpeed),  P3(Temperature), P4(cloud),P5(rain), P6(solarirradiation)
     sub_feature1 = 5;
     sub_feature2 = 7:12;
     feature = horzcat(sub_feature1,sub_feature2);
-
-    % file does not exist so use already created .mat
     %% load .mat file
     building_num = num2str(predictors(2,1));
     load_name = '\PV_fitnet_ANN_';
@@ -30,7 +28,7 @@ function target = PVset_ANN_Forecast(predictors,shortTermPastData,path)
     end
     result_ForecastData_ANN_premean = result_ForecastData_ANN{1}+result_ForecastData_ANN{2}+result_ForecastData_ANN{3};
     result_ForecastData_ANN_mean = result_ForecastData_ANN_premean/3;
-    [result1,result2] = PVset_error_correction_sun(predictors,result_ForecastData_ANN_mean,shortTermPastData,path);
+    [result1,result2] = PVget_error_correction_sun(predictors,result_ForecastData_ANN_mean,shortTermPastData,path);
     %% ResultingData File
     ResultingData_ANN(:,1:11) = predictors(:,1:11);
     ResultingData_ANN(:,13) = result1;

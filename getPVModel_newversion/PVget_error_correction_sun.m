@@ -1,4 +1,4 @@
-function [result1,result2] =PVset_error_correction_sun(ForecastData_ANN,result_ForecastData_ANN_mean,shortTermPastData,path)
+function [result1,result2] =PVget_error_correction_sun(ForecastData_ANN,result_ForecastData_ANN_mean,shortTermPastData,path)
  % 2019/07/22 Made by Gyeonggak
  % kakkyoung2@gmail.com
   % result 1: find sunset,sunrise time and put 0 value
@@ -21,13 +21,13 @@ function [result1,result2] =PVset_error_correction_sun(ForecastData_ANN,result_F
   mean_shortterm(end+1,:)=mean_shortterm(1,:);
   a=any(mean_shortterm(:,13),2);
   if sum(a)>10
-      sunrise_time=[8 0];
+            sunrise_time=[8 0];
       sunset_time=[17 0];
       for i=1:m_forecast
           if mean_shortterm(i,13)==0 && mean_shortterm(i+1,13)~=0 && mean_shortterm(i,5) < 8
-              sunrise_time(1,:)=mean_shortterm(i,5:6);
+              sunrise_time=mean_shortterm(i,5:6);
           elseif mean_shortterm(i+1,13)==0 && mean_shortterm(i,13)~=0 && mean_shortterm(i,5) >=17
-              sunset_time(1,:)=mean_shortterm(i+1,5:6);
+              sunset_time=mean_shortterm(i+1,5:6);
           end
       end
       sunrise_time=floor(sunrise_time);
@@ -77,14 +77,13 @@ function [result1,result2] =PVset_error_correction_sun(ForecastData_ANN,result_F
   load(load_name,'-mat');
   %% Find forecast result Using ANN
   feature = [5 7:12];
-  len=[1:96];
-  row=[len len len len len len len ];
   for i_loop = 1:3
       net_ANN = net_ANN_loop{i_loop};
       result_ForecastData_ANN_loop = zeros(m_Short,1);
       for i = 1:m_Short
           x2_ANN = transpose(shortTermPastData(i,feature));
           result_ForecastData_ANN_loop(i,:) = net_ANN(x2_ANN);
+          row(i)=rem(i,96)+1;
       end
       result_ForecastData_ANN{i_loop} = result_ForecastData_ANN_loop;
   end
@@ -92,14 +91,8 @@ function [result1,result2] =PVset_error_correction_sun(ForecastData_ANN,result_F
   result_ForecastData_ANN_mean = result_ForecastData_ANN_premean/3;
   %% Calculate error rate
   for i=1:m_Short
-      if rise_row<set_row
-          if row(i)< (rise_row) || row(i)>(set_row)
-              result_ForecastData_ANN_mean(i)=0;
-          end
-      elseif rise_row>set_row
-          if row(i)< (rise_row) && row(i)>(set_row)
-              result_ForecastData_ANN_mean(i)=0;
-          end
+      if row(i)< (rise_row) || row(i)>(set_row)
+          result_ForecastData_ANN_mean(i)=0;
       end
   end
   for i=1:m_Short
@@ -112,33 +105,32 @@ function [result1,result2] =PVset_error_correction_sun(ForecastData_ANN,result_F
   end
   k=1;
   for i=1:m_Short
-      result_err_data(row(i),k)=err_ShortData_rate(i);
-      if row(i)==96
+      j=rem(i,96);
+      if j==0
+          j=96;
+      end
+      result_data(j,k)=err_ShortData_rate(i);
+      if j==96
           k=k+1;
       end
   end
-  result_err_data=result_err_data';
+  result_data=result_data';
   %% Calculate avg_err_rate_mean
   % delete NaN value
-  for i = 1:size(result_err_data,1)
-      result_err_data(isnan(result_err_data(:,i)),:) = [];
+  for i = 1:size(result_data,1)
+      result_data(isnan(result_data(:,i)),:) = [];
   end
-  m_raw_ShortData_0 = sum(result_err_data == 0);             %count number of 0
- [m_raw_ShortData,~] = size(result_err_data);
-  num_vaild_data = m_raw_ShortData - m_raw_ShortData_0; %count number of valid data
-  err_ShortData_rate_sum = sum(result_err_data(:,:),1);      %sum of err rate
-  n_zero = find(err_ShortData_rate_sum(1,:) == 0);       %find row of 0 at err_ShortData_rate_sum
+  m_raw_ShortData_0 = sum(result_data == 0);             %count number of 0
+ [m_raw_ShortData,~] = size(result_data);
+  m_raw_ShortData = m_raw_ShortData - m_raw_ShortData_0; %count number of valid data
+  err_ShortData_rate_sum = sum(result_data(:,:),1);      %sum of err rate
+  n_zero = find(err_ShortData_rate_sum(1,:) == 0);       %count number of 0 at err_ShortData_rate_sum
   [~,M_n_zero] = size(n_zero);
   %put mean value at 0 value
-%      for i_n_zero = 1:M_n_zero
-%           num_vaild_data(1,n_zero(1,i_n_zero)) = 1;
-%      enddgh
-avg_err_rate_mean=zeros(m_forecast,1);
-for i=1:m_forecast
-    if num_vaild_data(i)~=0
-        avg_err_rate_mean(i,1) = err_ShortData_rate_sum(1,i) ./ num_vaild_data(i);
-    end
-end
+  for i_n_zero = 1:M_n_zero
+      m_raw_ShortData(1,n_zero(1,i_n_zero)) = 1;
+  end
+  avg_err_rate_mean = err_ShortData_rate_sum ./ m_raw_ShortData;
   %% final result
-  result2= result1.*(1+avg_err_rate_mean);
+  result2= result1./(1-avg_err_rate_mean');
 end

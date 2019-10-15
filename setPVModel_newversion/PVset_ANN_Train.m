@@ -1,4 +1,7 @@
 function target = PVset_ANN_Train(LongTermpastData,path)
+% Seung Hyeon made this code first 
+% 2019/10/15 modified by Gyeonggak Kim (kakkyoung2@gmail.com)
+% fix error & change predictor   
     %% set featur
     % P1(hour), P2(temp), P3(cloud), 
     sub_feature1 = 5;
@@ -12,9 +15,9 @@ function target = PVset_ANN_Train(LongTermpastData,path)
     for i_loop = 1:3
         trainDay_ANN =m_PastData_ANN;
         x_PV_ANN = transpose(PastData_ANN(1:trainDay_ANN,feature)); % input(feature)
-        t_PV_ANN = transpose(PastData_ANN(1:trainDay_ANN,12)); % target
+        t_PV_ANN = transpose(PastData_ANN(1:trainDay_ANN,13)); % target
         % Create and display the network
-        net_ANN = fitnet([20,20,20,20,5],'trainscg');
+        net_ANN = fitnet([20,20,20,15,10],'trainscg');
         net_ANN.trainParam.showWindow = false;
         net_ANN = train(net_ANN,x_PV_ANN,t_PV_ANN); % Train the network using the data in x and t
         net_ANN_loop{i_loop} = net_ANN;             % save result 

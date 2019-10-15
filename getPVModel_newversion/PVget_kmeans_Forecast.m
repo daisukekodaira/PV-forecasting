@@ -1,4 +1,4 @@
-function predictedPVGen = PVset_kmeans_Forecast(ForecastData, shortTermPastData, path)
+function predictedPVGen = PVget_kmeans_Forecast(ForecastData, shortTermPastData, path)
 % PV prediction: Forecast algorithm made by Seung Hyeon  
 % 2019/06/25 Updated by gyeong gak (kakkyoung2@gmail.com)
 % The code has been modified to match the PV forecast
@@ -75,9 +75,9 @@ for i = 1:m_ForecastData
 end
 y_pv = new_version_ResultingData(1:m_ForecastData,13);
 % Return standardized data back to real value.
-Result_pv(:,1) =y_pv;
+Result_pv(:,1) = y_pv;
 if exist('shortTermPastData','var')
-    y_err_rate = PVset_error_correction_kmeans(shortTermPastData,path);
+    y_err_rate = PVget_error_correction_kmeans(shortTermPastData,path);
 end
 Result_pv(:,2)=Result_pv(:,1)./(1-y_err_rate');
 for i=1:size(Result_pv,1)
