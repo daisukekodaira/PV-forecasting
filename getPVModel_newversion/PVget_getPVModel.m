@@ -55,7 +55,7 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     %% Prediction for test data
     predicted_PV(1).data = PVget_kmeans_Forecast(predictors, short_past_load, filepath);
     predicted_PV(2).data = PVget_ANN_Forecast(predictors, short_past_load, filepath);
-    predicted_PV(3).data = PVget_LSTM_Forecast(predictors, filepath);
+    predicted_PV(3).data = PVget_LSTM_Forecast(predictors,short_past_load, filepath);
     %% Prediction result
     for hour = 1:24
         for i = 1:size(coeff(1).data,1) % the number of prediction methods(k-means and fitnet)

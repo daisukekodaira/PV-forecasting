@@ -1,4 +1,4 @@
-function target = PVset_LSTM_Forecast(input,path)
+function result1 = PVget_LSTM_Forecast(input,shorttermdata,path)
 % PV prediction: LSTM Model Forecast algorithm
 % 2019/10/15 Updated gyeong gak (kakkyoung2@gmail.com)
 %% load .mat file
@@ -19,4 +19,5 @@ for i = 1:numTimeStepsTest
     [net,YPred(:,i+96)] = predictAndUpdateState(net,XTest(:,i),'ExecutionEnvironment','auto');
 end
 YPred = sigdata(13).*YPred(96+1:end) + meandata(13);
-target=transpose(YPred);
+result_LSTM=transpose(YPred);
+[result1,result2]= PVget_error_correction_sun(Forecastdata,result_LSTM,shorttermdata,path); % result 2 is for ANN
