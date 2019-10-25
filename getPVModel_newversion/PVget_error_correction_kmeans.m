@@ -4,7 +4,6 @@ function y = PVget_error_correction_kmeans(shortTermPastData,path)
 % 2019/10/15 modified by Gyeonggak, fix error & change predictor   
 % This code uses shortterm data to calculate the average error rate and reflects the error rate to the actual predicted value.
 % Feture: P1(Humidity), P2(WindSpeed),  P3(Temperature), P4(cloud),P5(rain), P6(solarirradiation)
-feature = [3:8];
 %% load .mat file
 [m_Short,~] = size(shortTermPastData);
 building_num = num2str(shortTermPastData(2,1));
@@ -26,7 +25,7 @@ for i_loop = 1:3
     nb_pv = nb_pv_loop{i_loop};
     c_PastData_pv = c_PastData_pv_loop{i_loop};
     for i_forecast = 1:m_raw_ShortData
-        input_kmeans(i_forecast,:) = raw_ShortData(i_forecast,feature); % feature
+        input_kmeans(i_forecast,:) = raw_ShortData(i_forecast,Feature); % feature
         Result_idx(i_forecast,1) = nb_pv.predict(input_kmeans(i_forecast,:));
         Result_value(i_forecast,:) = c_PastData_pv(Result_idx(i_forecast,:),:);
     end

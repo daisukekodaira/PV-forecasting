@@ -1,4 +1,4 @@
-function [result1,result2] =PVset_error_correction_sun(ForecastData_ANN,result_ForecastData_ANN_mean,shortTermPastData,path)
+function [result1,result2] =PVset_error_correction_sun(ForecastData,result_ForecastData,shortTermPastData,path)
  % 2019/07/22 Made by Gyeonggak
  % kakkyoung2@gmail.com
   % result 1: find sunset,sunrise time and put 0 value
@@ -9,7 +9,7 @@ function [result1,result2] =PVset_error_correction_sun(ForecastData_ANN,result_F
   % Change predictor & Modify error
   %% 1. Find sunset,sunrise time code
   %% find sunrise,sunset time using mean of shorttermPastData
-  [m_forecast,~] = size(ForecastData_ANN);
+  [m_forecast,~] = size(ForecastData);
   [m_shortterm,n_shortterm]=size(shortTermPastData);
   
   days=floor(m_shortterm/m_forecast);
@@ -47,9 +47,9 @@ function [result1,result2] =PVset_error_correction_sun(ForecastData_ANN,result_F
       %% fine sunrise,sunset time row
       for i=1:m_forecast
           for j=1:2
-              if ForecastData_ANN(i,5:6)== sunrise_time(j,:)
+              if ForecastData(i,5:6)== sunrise_time(j,:)
                   rise_row=i;
-              elseif  ForecastData_ANN(i,5:6) == sunset_time(j,:)
+              elseif  ForecastData(i,5:6) == sunset_time(j,:)
                   set_row=i;
               end
           end
@@ -59,11 +59,11 @@ function [result1,result2] =PVset_error_correction_sun(ForecastData_ANN,result_F
       for i=1:m_forecast
           if rise_row < set_row
               if i >= rise_row && i <= set_row
-                  result1(i,1)=result_ForecastData_ANN_mean(i,1);
+                  result1(i,1)=result_ForecastData(i,1);
               end
           elseif rise_row > set_row
               if i >= rise_row || i <= set_row
-                  result1(i,1)=result_ForecastData_ANN_mean(i,1);
+                  result1(i,1)=result_ForecastData(i,1);
               end
           end
       end
@@ -76,34 +76,33 @@ function [result1,result2] =PVset_error_correction_sun(ForecastData_ANN,result_F
   load_name = strcat(path,load_name,building_num,'.mat');
   load(load_name,'-mat');
   %% Find forecast result Using ANN
-  feature = [5 7:12];
   len=[1:96];
   row=[len len len len len len len ];
   for i_loop = 1:3
-      net_ANN = net_ANN_loop{i_loop};
-      result_ForecastData_ANN_loop = zeros(m_Short,1);
+      net_PV_ANN = net_PV_ANN_loop{i_loop};
+      result_PV_ANN_loop = zeros(m_Short,1);
       for i = 1:m_Short
-          x2_ANN = transpose(shortTermPastData(i,feature));
-          result_ForecastData_ANN_loop(i,:) = net_ANN(x2_ANN);
+          x2_ANN = transpose(shortTermPastData(i,feature2));
+          result_PV_ANN_loop(i,:) = net_PV_ANN(x2_ANN);
       end
-      result_ForecastData_ANN{i_loop} = result_ForecastData_ANN_loop;
+      result_PV_ANN{i_loop} = result_PV_ANN_loop;
   end
-  result_ForecastData_ANN_premean = result_ForecastData_ANN{1}+result_ForecastData_ANN{2}+result_ForecastData_ANN{3};
-  result_ForecastData_ANN_mean = result_ForecastData_ANN_premean/3;
+  result_PV_ANN_premean = result_PV_ANN{1}+result_PV_ANN{2}+result_PV_ANN{3};
+  result_ForecastData = result_PV_ANN_premean/3;
   %% Calculate error rate
   for i=1:m_Short
       if rise_row<set_row
           if row(i)< (rise_row) || row(i)>(set_row)
-              result_ForecastData_ANN_mean(i)=0;
+              result_ForecastData(i)=0;
           end
       elseif rise_row>set_row
           if row(i)< (rise_row) && row(i)>(set_row)
-              result_ForecastData_ANN_mean(i)=0;
+              result_ForecastData(i)=0;
           end
       end
   end
   for i=1:m_Short
-      err_ShortData(i,1)=shortTermPastData(i,13) - result_ForecastData_ANN_mean(i,1);
+      err_ShortData(i,1)=shortTermPastData(i,13) - result_ForecastData(i,1);
       if shortTermPastData(i,13)==0
           err_ShortData_rate(i,1)=0;
       else

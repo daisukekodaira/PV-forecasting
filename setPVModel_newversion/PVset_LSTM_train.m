@@ -11,32 +11,76 @@ if sigdata(11)==0 % in case of rain, its valus is usually 0. so it make NAN valu
     sigdata(11)=1;
 end
 dataTrainStandardized = (predata - meandata) ./ sigdata;
-predictorscol=[5 7:12];
-predictors=dataTrainStandardized(:,predictorscol);
-targetdata=dataTrainStandardized(:,13);
+dataTrainStandardized(:,5)=dataTrainStandardized(:,5)+dataTrainStandardized(:,6)*0.25;
+predata( ~any(predata(:,13),2), : ) = []; 
+R=corrcoef(predata(:,:));
+k=1;m=1;
+for i=1:size(R,1)
+    if abs(R(end-1,i))>0.25 && i< size(R,2)-1
+    predictor_sun(k)=i;
+    k=k+1;
+    end
+    if abs(R(end,i))>0.25 && i<size(R,2)
+    predictor_ger(m)=i;
+    m=m+1;
+    end
+end
+%% train lstm (solar)
 
-XTrain=transpose(predictors);
-YTrain= transpose(targetdata);
-%% train lstm
-numFeatures = 7;
+predictorscol1=[5 predictor_sun];
+predictors1=dataTrainStandardized(:,predictorscol1);
+targetdata1=dataTrainStandardized(:,12);
+XTrain1=transpose(predictors1);
+YTrain1= transpose(targetdata1);
+%lstm
+numFeatures = size(predictorscol1,2);
 numResponses = 1;
-numHiddenUnits = 200;
-
+numHiddenUnits1 = 100;
+numHiddenUnits2 = 50;
 layers = [ ...
     sequenceInputLayer(numFeatures)
-    lstmLayer(numHiddenUnits)
+    lstmLayer(numHiddenUnits1)
+    lstmLayer(numHiddenUnits2)
     fullyConnectedLayer(numResponses)
     regressionLayer];
 
 options = trainingOptions('adam', ...
     'MaxEpochs',250, ...
     'GradientThreshold',1.2, ...
-    'InitialLearnRate',0.005, ...
+    'InitialLearnRate',0.01, ...
     'LearnRateSchedule','piecewise', ...
     'LearnRateDropPeriod',125, ...
     'LearnRateDropFactor',0.2, ...
     'Verbose',0);
-net = trainNetwork(XTrain,YTrain,layers,options);
+solar_net = trainNetwork(XTrain1,YTrain1,layers,options);
+
+%% train lstm (generation)
+predictorscol2=[5 predictor_ger];
+predictors2=dataTrainStandardized(:,predictorscol2);
+targetdata2=dataTrainStandardized(:,13);
+XTrain2=transpose(predictors2);
+YTrain2= transpose(targetdata2);
+%lstm
+numFeatures = size(predictorscol2,2);
+numResponses = 1;
+numHiddenUnits1 = 100;
+numHiddenUnits2 = 50;
+layers = [ ...
+    sequenceInputLayer(numFeatures)
+    lstmLayer(numHiddenUnits1)
+    lstmLayer(numHiddenUnits2)
+    fullyConnectedLayer(numResponses)
+    regressionLayer];
+
+options = trainingOptions('adam', ...
+    'MaxEpochs',250, ...
+    'GradientThreshold',1.2, ...
+    'InitialLearnRate',0.01, ...
+    'LearnRateSchedule','piecewise', ...
+    'LearnRateDropPeriod',125, ...
+    'LearnRateDropFactor',0.2, ...
+    'Verbose',0);
+pv_net = trainNetwork(XTrain2,YTrain2,layers,options);
     %% save result mat file
     clearvars input;
     clearvars shortTermPastData dataTrainStandardized 

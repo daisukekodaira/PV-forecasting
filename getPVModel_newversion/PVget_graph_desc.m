@@ -25,22 +25,22 @@ function PVget_graph_desc(x, y_pred, y_true, boundaries, name, ci_percentage,max
     %% Graph description for prediction result 
     f = figure;
     hold on;
-    plot(x, y_pred,'g');
+    plot(x, y_pred,'g','LineWidth',1);
     if isempty(y_true) == 0
-        plot(x, y_true,'r');
+        plot(x, y_true,'r','LineWidth',1);
     else
-        plot(zeros(x,1));
+        plot(zeros(x,1),'LineWidth',1);
     end
     if isempty(boundaries) == 0
         boundaries1=zeros(size(boundaries));
         boundaries1(end-set_point+1:end)=boundaries(1:set_point);
         boundaries1(1:end-set_point)=boundaries(set_point+1:end);% chage boundaries of form (0~23 hour)
-        plot(x,boundaries(:,1),'b--');
-        plot(x,boundaries(:,2),'b--');
+        plot(x,boundaries(:,1),'b--','LineWidth',0.7);
+        plot(x,boundaries(:,2),'b--','LineWidth',0.7);
     end
     CI = 100*(1-ci_percentage);
     xlabel('Time [h]');
-    ylabel('Generation [MW]');
+    ylabel('Generation [kW]');
     title(name);
     legend('predicted Load', 'True', [num2str(CI) '% Prediction Interval']);
 

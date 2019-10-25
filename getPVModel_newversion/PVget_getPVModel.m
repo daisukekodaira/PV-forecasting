@@ -42,7 +42,7 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     %% Load mat files
     s1 = 'PV_pso_coeff_';
     s2 = 'PV_err_distribution_';
-    s3 = num2str(buildingIndex);    
+    s3 = num2str(buildingIndex); 
     name(1).string = strcat(s1,s3);
     name(2).string = strcat(s2,s3);
     varX(1).value = 'coeff';

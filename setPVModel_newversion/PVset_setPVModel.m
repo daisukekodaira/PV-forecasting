@@ -23,13 +23,13 @@ function flag = PVset_setPVModel(LongTermPastData)
     %% Devide the data into training and validation
     valid_data = longPast(end-n_valid_data+1:end, :); 
     train_data = longPast(1:end-n_valid_data, :); 
-    valid_predictors = longPast(end-n_valid_data+1:end, 1:end-1);    
+    valid_predictors = longPast(end-n_valid_data+1:end, 1:end-1);
 
     %% Train each model using past load data
-    PVset_kmeans_Train(longPast, path);
     PVset_ANN_Train(longPast, path);
     PVset_LSTM_train(longPast, path);
-    
+    PVset_kmeans_Train(longPast, path);
+
     %% Validate the performance of each model
     for day = 1:ValidDays 
         TimeIndex = size(train_data,1)+1+96*(day-1);  % Indicator of the time instance for validation data in past_load, 
@@ -37,11 +37,11 @@ function flag = PVset_setPVModel(LongTermPastData)
         valid_predictor = valid_predictors(1+(day-1)*96:day*96, 1:end);  % predictor for 1 day (96 data instances) 
         y_ValidEstIndv(1).data(:,day) = PVset_kmeans_Forecast(valid_predictor, short_past_load, path);
         y_ValidEstIndv(2).data(:,day) = PVset_ANN_Forecast(valid_predictor, short_past_load, path);
-        y_ValidEstIndv(3).data(:,day) = PVset_LSTM_Forecast(valid_predictor, path);
+        y_ValidEstIndv(3).data(:,day) = PVset_LSTM_Forecast(valid_predictor,short_past_load, path);
     end
     
     %% Optimize the coefficients for the additive model
-    coeff = PVset_pso_main(y_ValidEstIndv, valid_data(:,end));  
+    coeff = PVset_pso_main(y_ValidEstIndv, valid_data(:,end));
     
     %% Integrate individual forecasting algorithms
     % 1. k-means byacian 

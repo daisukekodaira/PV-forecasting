@@ -76,20 +76,19 @@ load_name = '\PV_fitnet_ANN_';
 load_name = strcat(path,load_name,building_num,'.mat');
 load(load_name,'-mat');
 %% Find forecast result Using ANN
-feature = [5 7:12];
 len=[1:96];
 row=[len len len len len len len ];
 for i_loop = 1:3
-    net_ANN = net_ANN_loop{i_loop};
-    result_ForecastData_ANN_loop = zeros(m_Short,1);
+    net_PV_ANN = net_PV_ANN_loop{i_loop};
+    result_PV_ANN_loop = zeros(m_Short,1);
     for i = 1:m_Short
-        x2_ANN = transpose(shortTermPastData(i,feature));
-        result_ForecastData_ANN_loop(i,:) = net_ANN(x2_ANN);
+        x2_ANN = transpose(shortTermPastData(i,feature2));
+        result_PV_ANN_loop(i,:) = net_PV_ANN(x2_ANN);
     end
-    result_ForecastData_ANN{i_loop} = result_ForecastData_ANN_loop;
+    result_PV_ANN{i_loop} = result_PV_ANN_loop;
 end
-result_ForecastData_ANN_premean = result_ForecastData_ANN{1}+result_ForecastData_ANN{2}+result_ForecastData_ANN{3};
-result_ForecastData_ANN_mean = result_ForecastData_ANN_premean/3;
+result_PV_ANN_premean = result_PV_ANN{1}+result_PV_ANN{2}+result_PV_ANN{3};
+result_ForecastData = result_PV_ANN_premean/3;
 %% Calculate error rate
 for i=1:m_Short
     if row(i)< (rise_row) || row(i)>(set_row)

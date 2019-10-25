@@ -18,8 +18,7 @@ function y = PVget_Format_Change(input_data)
         else
             old_format_PastData(j,8 + (new_format_PastData(i,5)*4 + new_format_PastData(i,6))) = new_format_PastData(i,13);
         end
-        if i == m_new_format_PastData
-        else
+        if i ~= m_new_format_PastData
             if (new_format_PastData(i,4) - new_format_PastData((i+1),4)) ~= 0
                 j = j + 1;
             end
@@ -29,21 +28,24 @@ function y = PVget_Format_Change(input_data)
     j = 1;k=1;
     old_format_PastData(1:end,1) = new_format_PastData(1,1);
     for i = 1:m_new_format_PastData
-        if i == m_new_format_PastData
-            old_format_PastData(j,3:4) = new_format_PastData(i,7:8);
-            old_format_PastData(j,5) = max(new_format_PastData(k:i,9));
-            old_format_PastData(j,6:8) = new_format_PastData(i,10:12);
-            old_format_PastData(j,2) = new_format_PastData(i,2)*10000 + new_format_PastData(i,3)*100 + new_format_PastData(i,4);
+        old_format_PastData(j,3) = max(new_format_PastData(:,7));
+        old_format_PastData(j,4) = mean(new_format_PastData(k:i,8));
+        old_format_PastData(j,5) = max(new_format_PastData(:,9));
+        old_format_PastData(j,6:8) = mean(new_format_PastData(k:i,10:12));
+     	mon=(new_format_PastData(i,3) + round(new_format_PastData(i,4)/30));
+        if mon >= 12 || mon < 3  %Winter
+            old_format_PastData(j,2) = 1;
+        elseif mon >= 6 && mon<9 %summer
+            old_format_PastData(j,2) = 3;
         else
-            old_format_PastData(j,3:4) = new_format_PastData(i,7:8);
-            old_format_PastData(j,5) = max(new_format_PastData(k:i,9));
-            old_format_PastData(j,6:8) = new_format_PastData(i,10:12);
-            old_format_PastData(j,2) = new_format_PastData(i,2)*10000 + new_format_PastData(i,3)*100 + new_format_PastData(i,4);
-                if (new_format_PastData(i,4) - new_format_PastData((i+1),4)) ~= 0
-                    j = j + 1;
-                    k=i;
-                end
+            old_format_PastData(j,2) = 2;
+        end
+        if i ~= m_new_format_PastData
+            if (new_format_PastData(i,4) - new_format_PastData((i+1),4)) ~= 0
+                j = j + 1;
+                k=i;
+            end
         end
     end
     y=old_format_PastData;
- 
+    

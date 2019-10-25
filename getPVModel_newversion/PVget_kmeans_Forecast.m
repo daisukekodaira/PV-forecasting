@@ -18,7 +18,7 @@ dataForecastStandardized = horzcat(ForecastData(:,1:6),dataForecastStandardized)
 % There is no solar irradiance data so i predict solar data using k-means
 % Feature values: 1.Year 2.Month 3.Day 4.Temperature 5.Cloud
 TempArray = dataForecastStandardized(~any(isnan(dataForecastStandardized),2),:);
-predictorArray = horzcat(TempArray(:,3:5),TempArray(:,7:11));        % Set feature column
+predictorArray = horzcat(TempArray(:,[3 5]),TempArray(:,predictor_sun));        % Set feature column
 predict_label_nb_sunlight = nb_sunlight.predict(predictorArray);     % Find solar's idex using Bayesian
 result_nb_sunlight = c_sunlight(predict_label_nb_sunlight,:);        % Find solar irradiance using solar's idex
 dataForecastStandardized = horzcat(dataForecastStandardized,result_nb_sunlight); % Make a new forecast data
@@ -31,10 +31,18 @@ j = 1;k=1;
 % Patterning data. (if there is two day's data in forecast data, Separate data in two rows)
 for i = 1:m_ForecastData
     patterned_Forecastdata(j,1)=dataForecastStandardized(2,1);
-    patterned_Forecastdata(j,3:4) = dataForecastStandardized(i,7:8);
-    patterned_Forecastdata(j,5)=max(dataForecastStandardized(k:i,9));
-    patterned_Forecastdata(j,6:8) = dataForecastStandardized(i,10:12);
-    patterned_Forecastdata(j,2) = dataForecastStandardized(i,2)*10000 + dataForecastStandardized(i,3)*100 + dataForecastStandardized(i,4);
+    patterned_Forecastdata(j,3)=max(dataForecastStandardized(i,7));
+    patterned_Forecastdata(j,4)=mean(dataForecastStandardized(k:i,8));
+    patterned_Forecastdata(j,5)=max(dataForecastStandardized(i,9));
+    patterned_Forecastdata(j,6:8)=mean(dataForecastStandardized(k:i,10:12));
+    mon=(dataForecastStandardized(i,3) + round(dataForecastStandardized(i,4)/30));
+    if mon >= 12 || mon < 3  %Winter
+        patterned_Forecastdata(j,2) = 1;
+    elseif mon >= 6 && mon<9
+        patterned_Forecastdata(j,2) = 3;
+    else
+        patterned_Forecastdata(j,2) = 2;
+    end
     if i ~= m_ForecastData && (dataForecastStandardized(i,4) - dataForecastStandardized((i+1),4)) ~= 0
         j = j + 1;
         k=i;
@@ -87,6 +95,7 @@ for i=1:size(Result_pv,1)
         end
     end
 end
-predictedPVGen=Result_pv(:,2);
+predictedPVGen=Result_pv(:,1);
+% predictedPVGen=Result_pv(:,2);
 end
 

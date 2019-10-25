@@ -1,6 +1,4 @@
 clear all;
 clc;
 close all;
-y_pred = setPVModel([pwd, '\','PLT_201902192359DDG.csv']);
-
-
+y_pred = PVset_setPVModel([pwd, '\','PLT_201902102359DDG.csv']);

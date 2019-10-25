@@ -1,4 +1,4 @@
-function target = PVset_LSTM_Forecast(input,path)
+function result1 = PVset_LSTM_Forecast(input,shorttermdata,path)
 % PV prediction: LSTM Model Forecast algorithm
 % 2019/10/15 Updated gyeong gak (kakkyoung2@gmail.com)
 %% load .mat file
@@ -8,16 +8,33 @@ load_name = '\PV_LSTM_';
 load_name = strcat(path,load_name,building_num,'.mat');
 load(load_name,'-mat');
 
-%% forecast
-data=Forecastdata(:,predictorscol);
-predictors =(data - meandata(predictorscol))./sigdata(predictorscol);
-
-XTest=transpose(predictors);
-net = predictAndUpdateState(net,XTrain);
-[net,YPred(:,1:96)] = predictAndUpdateState(net,XTrain(:,end-96+1:end));
-numTimeStepsTest = size(XTest,2);
+Forecastdata(:,5)=Forecastdata(:,5)+Forecastdata(:,6)*0.25;
+%% forecast solar
+data1=Forecastdata(:,predictorscol1);
+predictors =(data1 - meandata(predictorscol1))./sigdata(predictorscol1);
+XTest1=transpose(predictors);
+solar_net = predictAndUpdateState(solar_net,XTrain1);
+[solar_net,YPred_solar(:,1:96)] = predictAndUpdateState(solar_net,XTrain1(:,end-96+1:end));
+numTimeStepsTest = size(XTest1,2);
 for i = 1:numTimeStepsTest
-    [net,YPred(:,i+96)] = predictAndUpdateState(net,XTest(:,i),'ExecutionEnvironment','auto');
+    [solar_net,YPred_solar(:,i+96)] = predictAndUpdateState(solar_net,XTest1(:,i),'ExecutionEnvironment','auto');
+end
+Forecastdata(:,12)=YPred_solar(96+1:end)';
+%% forecast pv
+data2=Forecastdata(:,predictorscol2);
+predictors =(data2 - meandata(predictorscol2))./sigdata(predictorscol2);
+XTest2=transpose(predictors);
+pv_net = predictAndUpdateState(pv_net,XTrain2);
+[pv_net,YPred(:,1:96)] = predictAndUpdateState(pv_net,XTrain2(:,end-96+1:end));
+numTimeStepsTest = size(XTest2,2);
+for i = 1:numTimeStepsTest
+    [pv_net,YPred(:,i+96)] = predictAndUpdateState(pv_net,XTest2(:,i),'ExecutionEnvironment','auto');
 end
 YPred = sigdata(13).*YPred(96+1:end) + meandata(13);
-target=transpose(YPred);
+result_LSTM=transpose(YPred);
+for i=1:size(result_LSTM,1)
+    if result_LSTM(i)<0
+        result_LSTM(i)=0;
+    end
+end
+[result1,result2]= PVset_error_correction_sun(input,result_LSTM,shorttermdata,path); % result 2 is for ANN
