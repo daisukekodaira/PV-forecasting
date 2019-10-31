@@ -17,7 +17,7 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     tic;
     
     %% parameters
-    ci_percentage = 0.05; % 0.05 = 95% it must be between 0 to 1
+    ci_percentage = 0.05; % 0.05 = 95% it must be between 0 and 1
     %% Load data
     if strcmp(shortTermPastData, 'NULL') == 0 || strcmp(ForecastData, 'NULL') == 0 || strcmp(ResultData, 'NULL') == 0
         short_past_load = csvread(shortTermPastData,1,0);
@@ -28,10 +28,10 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
         return
     end       
 
-    %% Load .mat files from give path of "shortTermPastData"
+    %% Load .mat files from given path of "shortTermPastData"
     filepath = fileparts(shortTermPastData);
     buildingIndex = short_past_load(1,1);
-    %% Error recognition: Check mat files exist
+    %% Error recognition: Check if mat files exist
     name1 = [filepath, '\', 'PV_Model_', num2str(buildingIndex), '.mat'];
     name2 = [filepath, '\', 'PV_err_distribution_', num2str(buildingIndex), '.mat'];
     name3 = [filepath, '\', 'PV_pso_coeff_', num2str(buildingIndex), '.mat'];
@@ -56,9 +56,9 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     predicted_PV(1).data = PVget_kmeans_Forecast(predictors, short_past_load, filepath);
     predicted_PV(2).data = PVget_ANN_Forecast(predictors, short_past_load, filepath);
     predicted_PV(3).data = PVget_LSTM_Forecast(predictors,short_past_load, filepath);
-    %% Prediction result
+    %% Get Deterministic prediction result
     for hour = 1:24
-        for i = 1:size(coeff(1).data,1) % the number of prediction methods(k-means and fitnet)
+        for i = 1:size(coeff(1).data,1) % the number of prediction methods(k-means, ANN and LSTM)
             if i == 1
                 yDetermPred(1+(hour-1)*4:hour*4,:) = coeff(hour).data(i).*predicted_PV(i).data(1+(hour-1)*4:hour*4);
             else
@@ -117,8 +117,8 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     % display graph
     PVget_graph_desc(xtime, yDetermPred, observed, boundaries, 'Combined for forecast data', ci_percentage,max_xtime); % Combined
     PVget_graph_desc(xtime, predicted_PV(1).data, observed, [], 'k-means for forecast data', ci_percentage,max_xtime); % k-means
-    PVget_graph_desc(xtime, predicted_PV(2).data, observed, [], 'ANN for forecast data', ci_percentage,max_xtime); % k-means
-    PVget_graph_desc(xtime, predicted_PV(3).data, observed, [], 'LSTM for forecast data', ci_percentage,max_xtime);
+    PVget_graph_desc(xtime, predicted_PV(2).data, observed, [], 'ANN for forecast data', ci_percentage,max_xtime); % ANN
+    PVget_graph_desc(xtime, predicted_PV(3).data, observed, [], 'LSTM for forecast data', ci_percentage,max_xtime); % LSTM
 
     % Cover Rate of PI
     count = 0;
