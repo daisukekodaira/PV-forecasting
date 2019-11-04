@@ -35,7 +35,9 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     name1 = [filepath, '\', 'PV_Model_', num2str(buildingIndex), '.mat'];
     name2 = [filepath, '\', 'PV_err_distribution_', num2str(buildingIndex), '.mat'];
     name3 = [filepath, '\', 'PV_pso_coeff_', num2str(buildingIndex), '.mat'];
-    if exist(name1) == 0 || exist(name2) == 0 || exist(name3)== 0
+    name4 = [filepath, '\', 'PV_LSTM_', num2str(buildingIndex), '.mat'];
+    name5 = [filepath, '\', 'PV_fitnet_ANN_', num2str(buildingIndex), '.mat'];
+    if exist(name1) == 0 || exist(name2) == 0 || exist(name3)== 0 || exist(name4)== 0 || exist(name5)== 0
         flag = -1;
         return
     end    

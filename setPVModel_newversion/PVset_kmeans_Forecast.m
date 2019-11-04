@@ -87,7 +87,7 @@ Result_pv(:,1) =y_pv;
 if exist('shortTermPastData','var')
     y_err_rate = PVset_error_correction_kmeans(shortTermPastData,path);
 end
-Result_pv(:,2)=Result_pv(:,1)./(1-y_err_rate');
+Result_pv(:,2)=Result_pv(:,1)./(1+y_err_rate');
 for i=1:size(Result_pv,1)
     for j=1:size(Result_pv,2)
         if Result_pv(i,j)<0.01

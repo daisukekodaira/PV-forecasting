@@ -30,11 +30,12 @@ function [result1,result2] =PVset_error_correction_sun(ForecastData,result_Forec
               sunset_time(1,:)=mean_shortterm(i+1,5:6);
           end
       end
+      % set 2 row to prevent errors 
       sunrise_time=floor(sunrise_time);
       sunset_time=floor(sunset_time);
       sunrise_time(2,:)=sunrise_time(1,:);
       sunset_time(2,:)=sunset_time(1,:);
-      if sunrise_time(1,2)==3
+      if sunrise_time(1,2)==3  %quarter is 0~3 
           sunrise_time(2,2)=sunrise_time(1,2)-1;
       else
           sunrise_time(2,2)=sunrise_time(1,2)+1;
@@ -102,7 +103,7 @@ function [result1,result2] =PVset_error_correction_sun(ForecastData,result_Forec
       end
   end
   for i=1:m_Short
-      err_ShortData(i,1)=shortTermPastData(i,13) - result_ForecastData(i,1);
+      err_ShortData(i,1)=result_ForecastData(i,1)-shortTermPastData(i,13);
       if shortTermPastData(i,13)==0
           err_ShortData_rate(i,1)=0;
       else

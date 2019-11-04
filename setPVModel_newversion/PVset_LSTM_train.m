@@ -26,7 +26,6 @@ for i=1:size(R,1)
     end
 end
 %% train lstm (solar)
-
 predictorscol1=[5 predictor_sun];
 predictors1=dataTrainStandardized(:,predictorscol1);
 targetdata1=dataTrainStandardized(:,12);

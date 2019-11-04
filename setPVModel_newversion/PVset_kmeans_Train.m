@@ -49,7 +49,7 @@ if m_new_format_PastData < 96
     dataTrainStandardized(1:96,13) = mean(dataTrainStandardized(1:m_new_format_PastData,13)); % demand
 end
 %% Patterning data
-% 1:Building index , 2:Date, 3:Day of Week,  4:Holiday,  5:Temparature,
+% 1:Building index , 2:Date, 3:Humidity,  4:wind speed,  5:Temparature,
 %  6:Cloud, 7:Rain 8:SolarIrradiance,  9~104:Generation
 Patterned_PastData = PVset_Format_Change(dataTrainStandardized);
 %% Train model
