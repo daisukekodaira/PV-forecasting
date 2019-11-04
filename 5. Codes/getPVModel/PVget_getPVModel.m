@@ -129,6 +129,7 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     end
     a=0;b=0;c=0;d=0;
     PICoverRate = 100*count/size(observed,1);
+    % for calculate MAPE  (Mean Absolute Percentage Error)
     maxreal=max(observed);
     for i=1:size(yDetermPred,1)
         if observed(i)~=0 && observed(i)>maxreal*0.05
@@ -154,11 +155,26 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     MAPE(2)=sum(MAE(:,2))/b *100;
     MAPE(3)=sum(MAE(:,3))/c *100;
     MAPE(4)=sum(MAE(:,4))/d *100;
+
+    % for calculate RMSE(Root Mean Square Error)
+    data_num=size(yDetermPred,1);
+    for i=1:data_num %SE=Square Error
+        SE(i,1)= (yDetermPred(i) - observed(i))^2;
+        SE(i,2)= (predicted_PV(1).data(i)-observed(i))^2;
+        SE(i,3)= (predicted_PV(2).data(i)-observed(i))^2;
+        SE(i,4)= (predicted_PV(3).data(i)-observed(i))^2;
+    end
+    RMSE(1)=sqrt(sum(SE(:,1))/96);
+    RMSE(2)=sqrt(sum(SE(:,2))/96);
+    RMSE(3)=sqrt(sum(SE(:,3))/96);
+    RMSE(4)=sqrt(sum(SE(:,4))/96);
+  
     disp(['PI cover rate is ',num2str(PICoverRate), '[%]/', num2str(100*(1-ci_percentage)), '[%]'])
-    disp(['MAPE of combine model: ', num2str(MAPE(1)),'[%]'])
-    disp(['MAPE of kmeans: ', num2str(MAPE(2)),'[%]'])
-    disp(['MAPE of ANN: ', num2str(MAPE(3)),'[%]'])
-    disp(['MAPE of LSTM: ', num2str(MAPE(4)),'[%]'])
+    disp(['MAPE of combine model: ', num2str(MAPE(1)),'[%]','    RMSE of combine model: ', num2str(RMSE(1))])
+    disp(['MAPE of kmeans: ', num2str(MAPE(2)),'[%]','            RMSE of kmeans: ', num2str(RMSE(2))])
+    disp(['MAPE of ANN: ', num2str(MAPE(3)),'[%]','              RMSE of ANN: ', num2str(RMSE(3))])
+    disp(['MAPE of LSTM: ', num2str(MAPE(4)),'[%]','             RMSE of LSTM: ', num2str(RMSE(4))])
+    
    % for debugging --------------------------------------------------------------------- 
     
     flag = 1;
