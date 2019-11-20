@@ -24,7 +24,7 @@ function target = PVset_ANN_Forecast(predictors,shortTermPastData,path)
     end
     result_solar_ANN_premean = result_solar_ANN{1}+result_solar_ANN{2}+result_solar_ANN{3};
     result_solar_ANN_mean = max(result_solar_ANN_premean/3,0);
-    predictor(:,12)=result_solar_ANN_mean;
+    predictors(:,12)=result_solar_ANN_mean;
     %% Forecast PV using ANN
     % use ANN 3 times for reduce ANN's error
     for i_loop = 1:3
