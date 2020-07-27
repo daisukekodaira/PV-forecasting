@@ -1,41 +1,36 @@
-function predictedPVGen = PVset_kmeans_Forecast(ForecastData, shortTermPastData, path)
-% PV prediction: Forecast algorithm made by Seung Hyeon  
-% 2019/06/25 Updated by gyeong gak (kakkyoung2@gmail.com)
-% The code has been modified to match the PV forecast
-% 2019/10/15 updated by gyeong gak (kakkyoung2@gmail.com)
-% Add Data standardization & Forecast sunlight & chage predictor 
+function predictedPVGen = PVset_kmeans_Forecast(ForecastData, ~, path)
+start_kmeans_Forecast = tic;
 %% load .mat file
 building_num = num2str(ForecastData(2,1));
 load_name = '\PV_Model_';
 load_name = strcat(path,load_name,building_num,'.mat');
 load(load_name,'-mat');
-%% Standardization
-% The k-means clusters data using Euclidean distance. so We have to equalize the distance between the data.
-% Data such as time, irradiation, etc. have high variance. so i standardize
-dataForecastStandardized = (ForecastData(:,7:11) - mean_value(1:5)) ./ sig_value(1:5);
-dataForecastStandardized = horzcat(ForecastData(:,1:6),dataForecastStandardized);
+%% normalize
+% Data such as time, irradiation, etc. have high variance. so i normalize
+dataForecastnormalize = (ForecastData(:,7:11) - min_value(1:5)) ./ (max_value(1:5) - min_value(1:5));
+dataForecastnormalize = horzcat(ForecastData(:,1:6),dataForecastnormalize);
 %% Forecast solarlrradiance
 % There is no solar irradiance data so i predict solar data using k-means
 % Feature values: 1.Year 2.Month 3.Day 4.Temperature 5.Cloud
-TempArray = dataForecastStandardized(~any(isnan(dataForecastStandardized),2),:);
+TempArray = dataForecastnormalize(~any(isnan(dataForecastnormalize),2),:);
 predictorArray = horzcat(TempArray(:,[3 5]),TempArray(:,predictor_sun));        % Set feature column
 predict_label_nb_sunlight = nb_sunlight.predict(predictorArray);     % Find solar's idex using Bayesian
 result_nb_sunlight = c_sunlight(predict_label_nb_sunlight,:);        % Find solar irradiance using solar's idex
-dataForecastStandardized = horzcat(dataForecastStandardized,result_nb_sunlight); % Make a new forecast data
-ForecastData(:,12)=sig_value(6).*result_nb_sunlight + mean_value(6);       % Return standardized data back to real value.
+dataForecastnormalize = horzcat(dataForecastnormalize,result_nb_sunlight); % Make a new forecast data
+ForecastData(:,12)=(max_value(6) - min_value(6)).*result_nb_sunlight + min_value(6);       % Return normalize data back to real value.
 %% Patterning ForecastData
 % In PV forecast, it is much better to use patterned data
 % Count day number -> (0~23: 1 day), (8~7: 2 days)
-[m_ForecastData, ~]= size(dataForecastStandardized);
+[m_ForecastData, ~]= size(dataForecastnormalize);
 j = 1;k=1;
 % Patterning data. (if there is two day's data in forecast data, Separate data in two rows)
 for i = 1:m_ForecastData
-    patterned_Forecastdata(j,1)=dataForecastStandardized(2,1);
-    patterned_Forecastdata(j,3)=max(dataForecastStandardized(i,7));
-    patterned_Forecastdata(j,4)=mean(dataForecastStandardized(k:i,8));
-    patterned_Forecastdata(j,5)=max(dataForecastStandardized(i,9));
-    patterned_Forecastdata(j,6:8)=mean(dataForecastStandardized(k:i,10:12));
-    mon=(dataForecastStandardized(i,3) + round(dataForecastStandardized(i,4)/30));
+    patterned_Forecastdata(j,1)=dataForecastnormalize(2,1);
+    patterned_Forecastdata(j,3)=max(dataForecastnormalize(i,7));
+    patterned_Forecastdata(j,4)=mean(dataForecastnormalize(k:i,8));
+    patterned_Forecastdata(j,5)=max(dataForecastnormalize(i,9));
+    patterned_Forecastdata(j,6:8)=mean(dataForecastnormalize(k:i,10:12));
+    mon=(dataForecastnormalize(i,3) + round(dataForecastnormalize(i,4)/30));
     if mon >= 12 || mon < 3  %Winter
         patterned_Forecastdata(j,2) = 1;
     elseif mon >= 6 && mon<9
@@ -43,7 +38,7 @@ for i = 1:m_ForecastData
     else
         patterned_Forecastdata(j,2) = 2;
     end
-    if i ~= m_ForecastData && (dataForecastStandardized(i,4) - dataForecastStandardized((i+1),4)) ~= 0
+    if i ~= m_ForecastData && (dataForecastnormalize(i,4) - dataForecastnormalize((i+1),4)) ~= 0
         j = j + 1;
         k=i;
     end
@@ -81,21 +76,6 @@ for i = 1:m_ForecastData
         j = j + 1;
     end
 end
-y_pv = new_version_ResultingData(1:m_ForecastData,13);
-% Return standardized data back to real value.
-Result_pv(:,1) =y_pv;
-if exist('shortTermPastData','var')
-    y_err_rate = PVset_error_correction_kmeans(shortTermPastData,path);
+predictedPVGen = new_version_ResultingData(1:m_ForecastData,13);
+end_kmeans_Forecast = toc(start_kmeans_Forecast)
 end
-Result_pv(:,2)=Result_pv(:,1)./(1-y_err_rate');
-for i=1:size(Result_pv,1)
-    for j=1:size(Result_pv,2)
-        if Result_pv(i,j)<0.01
-            Result_pv(i,j)=0;
-        end
-    end
-end
-predictedPVGen=Result_pv(:,1);
-% predictedPVGen=Result_pv(:,2);
-end
-

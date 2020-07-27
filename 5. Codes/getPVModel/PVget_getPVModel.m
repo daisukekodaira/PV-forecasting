@@ -1,21 +1,11 @@
-% ---------------------------------------------------------------------------
 % Load prediction: Foecasting algorithm 
-% 2019/01/15 Updated Daisuke Kodaira 
-% daisuke.kodaira03@gmail.com
-%
-% 2019/10/15 Modified  GyeongGak Kim
-% kakkyoung2@gmail.com
-
 % function flag = demandForecast(shortTermPastData, ForecastData, ResultData)
 %     flag =1 ; if operation is completed successfully
 %     flag = -1; if operation fails.
 %     This function depends on demandModel.mat. If these files are not found return -1.
 %     The output of the function is "ResultData.csv"
-% ----------------------------------------------------------------------------
-
 function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
-    tic;
-    
+    tic;    
     %% parameters
     ci_percentage = 0.05; % 0.05 = 95% it must be between 0 and 1
     %% Load data
@@ -27,10 +17,9 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
         flag = -1;
         return
     end       
-
     %% Load .mat files from given path of "shortTermPastData"
     filepath = fileparts(shortTermPastData);
-    buildingIndex = short_past_load(1,1);
+    buildingIndex = short_past_load(1,1);    
     %% Error recognition: Check if mat files exist
     name1 = [filepath, '\', 'PV_Model_', num2str(buildingIndex), '.mat'];
     name2 = [filepath, '\', 'PV_err_distribution_', num2str(buildingIndex), '.mat'];
@@ -38,7 +27,7 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     if exist(name1) == 0 || exist(name2) == 0 || exist(name3)== 0
         flag = -1;
         return
-    end    
+    end        
     %% Load mat files
     s1 = 'PV_pso_coeff_';
     s2 = 'PV_err_distribution_';
@@ -51,21 +40,22 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     for i = 1:size(varX,2)
         matname = fullfile(filepath, [name(i).string extention]);
         load(matname);
-    end
-    %% Prediction for test data
-    predicted_PV(1).data = PVget_kmeans_Forecast(predictors, short_past_load, filepath);
-    predicted_PV(2).data = PVget_ANN_Forecast(predictors, short_past_load, filepath);
-    predicted_PV(3).data = PVget_LSTM_Forecast(predictors,short_past_load, filepath);
-    %% Get Deterministic prediction result
+    end    
+    %% Prediction for test data   
+    predicted_PV(1).data = PVget_kmeans_Forecast(predictors, short_past_load, filepath);   
+    predicted_PV(2).data = PVget_ANN_Forecast(predictors, short_past_load, filepath);   
+    predicted_PV(3).data = PVget_LSTM_Forecast(predictors,short_past_load, filepath);   
+    %% Get Deterministic prediction result   
+    [~,numCols]=size(coeff(1,:));
     for hour = 1:24
-        for i = 1:size(coeff(1).data,1) % the number of prediction methods(k-means, ANN and LSTM)
+        for i = 1:numCols % the number of prediction methods(k-means, ANN and LSTM)
             if i == 1
-                yDetermPred(1+(hour-1)*4:hour*4,:) = coeff(hour).data(i).*predicted_PV(i).data(1+(hour-1)*4:hour*4);
+                yDetermPred(1+(hour-1)*4:hour*4,:) = coeff(hour,i).*predicted_PV(i).data(1+(hour-1)*4:hour*4);
             else
-                yDetermPred(1+(hour-1)*4:hour*4,:) = yDetermPred(1+(hour-1)*4:hour*4,:) + coeff(hour).data(i).*predicted_PV(i).data(1+(hour-1)*4:hour*4);  
+                yDetermPred(1+(hour-1)*4:hour*4,:) = yDetermPred(1+(hour-1)*4:hour*4,:) + coeff(hour,i).*predicted_PV(i).data(1+(hour-1)*4:hour*4);  
             end
         end 
-    end    
+    end      
     %% Generate Result file    
     % Headers for output file
     hedder = {'BuildingIndex', 'Year', 'Month', 'Day', 'Hour', 'Quarter', 'DemandMean', 'CIMin', 'CIMax', 'CILevel', 'pmfStartIndx', 'pmfStep', ...
@@ -74,7 +64,6 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     fid = fopen(Resultfile,'wt');
     fprintf(fid,'%s,',hedder{:});
     fprintf(fid,'\n');
-
     %% Make distribution of ensemble forecasting
     for i = 1:size(yDetermPred,1)
         prob_prediction(:,i) = yDetermPred(i) + err_distribution(predictors(i,5)+1, predictors(i,6)+1).data;
@@ -87,22 +76,21 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
         pmfStart(i,:) = edges(i,1);
         pmfStart(i,:) = max(pmfStart(i,:), 0);
         pmfStep(i,:) =  abs(edges(i,1) - edges(i,2));
-    end
+    end   
     % When the validation date is for only one day
     if size(prob_prediction, 1) == 1    
         prob_prediction = [prob_prediction; prob_prediction];
-    end
+    end  
     % Get mean value of Probabilistic load prediction
-    y_mean = mean(prob_prediction)';
+    y_mean = mean(prob_prediction)';   
     % Get Confidence Interval
-    [L_boundary, U_boundary] = PVget_ci(prob_prediction, ci_percentage);
+    [L_boundary, U_boundary] = PVget_ci(prob_prediction, ci_percentage); 
     % Make matrix to be written in "ResultData.csv"
     result = [predictors(:,1:6) y_mean L_boundary U_boundary 100*(1-ci_percentage)*ones(size(yDetermPred,1),1) pmfStart pmfStep demandpmfData];
     fprintf(fid,['%d,', '%4d,', '%02d,', '%02d,', '%02d,', '%d,', '%f,', '%f,', '%f,', '%02d,', '%f,', '%f,', repmat('%f,',1,10) '\n'], result');
     fclose(fid);
-    
     % for debugging --------------------------------------------------------
-    %% Display graph
+    %% Display graph  
     % make x timestep
     timestep=csvread(ForecastData,1,4,[1,4,96,5]);
     xtime=timestep(:,1)+0.25*timestep(:,2);
@@ -113,13 +101,12 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
         end
     end
     observed = csvread('target_test.csv');
-    boundaries =  [L_boundary, U_boundary];
+    boundaries =  [L_boundary, U_boundary];   
     % display graph
     PVget_graph_desc(xtime, yDetermPred, observed, boundaries, 'Combined for forecast data', ci_percentage,max_xtime); % Combined
     PVget_graph_desc(xtime, predicted_PV(1).data, observed, [], 'k-means for forecast data', ci_percentage,max_xtime); % k-means
     PVget_graph_desc(xtime, predicted_PV(2).data, observed, [], 'ANN for forecast data', ci_percentage,max_xtime); % ANN
     PVget_graph_desc(xtime, predicted_PV(3).data, observed, [], 'LSTM for forecast data', ci_percentage,max_xtime); % LSTM
-
     % Cover Rate of PI
     count = 0;
     for i = 1:(size(observed,1))
@@ -155,7 +142,6 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     MAPE(2)=sum(MAE(:,2))/b *100;
     MAPE(3)=sum(MAE(:,3))/c *100;
     MAPE(4)=sum(MAE(:,4))/d *100;
-
     % for calculate RMSE(Root Mean Square Error)
     data_num=size(yDetermPred,1);
     for i=1:data_num %SE=Square Error
@@ -167,16 +153,13 @@ function flag = PVget_getPVModel(shortTermPastData, ForecastData, ResultData)
     RMSE(1)=sqrt(sum(SE(:,1))/96);
     RMSE(2)=sqrt(sum(SE(:,2))/96);
     RMSE(3)=sqrt(sum(SE(:,3))/96);
-    RMSE(4)=sqrt(sum(SE(:,4))/96);
-  
+    RMSE(4)=sqrt(sum(SE(:,4))/96); 
     disp(['PI cover rate is ',num2str(PICoverRate), '[%]/', num2str(100*(1-ci_percentage)), '[%]'])
     disp(['MAPE of combine model: ', num2str(MAPE(1)),'[%]','    RMSE of combine model: ', num2str(RMSE(1))])
     disp(['MAPE of kmeans: ', num2str(MAPE(2)),'[%]','            RMSE of kmeans: ', num2str(RMSE(2))])
     disp(['MAPE of ANN: ', num2str(MAPE(3)),'[%]','              RMSE of ANN: ', num2str(RMSE(3))])
-    disp(['MAPE of LSTM: ', num2str(MAPE(4)),'[%]','             RMSE of LSTM: ', num2str(RMSE(4))])
-    
-   % for debugging --------------------------------------------------------------------- 
-    
+    disp(['MAPE of LSTM: ', num2str(MAPE(4)),'[%]','             RMSE of LSTM: ', num2str(RMSE(4))])  
+   % for debugging ---------------------------------------------------------------------  
     flag = 1;
-    toc;
+    toc; 
 end

@@ -1,8 +1,5 @@
-% Seung Hyeon made this code first 
-% 2019/10/15 modified by Gyeonggak Kim (kakkyoung2@gmail.com)
-% fix error & change predictor   
-
-function target = PVset_ANN_Forecast(predictors,shortTermPastData,path)    
+function target = PVset_ANN_Forecast(predictors,~,path) 
+    start_ANN_Forecast = tic;
     %% load .mat file
     building_num = num2str(predictors(2,1));
     load_name = '\PV_fitnet_ANN_';
@@ -24,8 +21,7 @@ function target = PVset_ANN_Forecast(predictors,shortTermPastData,path)
         result_solar_ANN{i_loop} = result_solar_ANN_loop;
     end
     result_solar_ANN_premean = result_solar_ANN{1}+result_solar_ANN{2}+result_solar_ANN{3};
-    result_solar_ANN_mean = max(result_solar_ANN_premean/3,0);
-    predictors(:,12)=result_solar_ANN_mean;
+    predictors(:,12) = max(result_solar_ANN_premean/3,0);
     %% Forecast PV using ANN
     % use ANN 3 times for reduce ANN's error
     for i_loop = 1:3
@@ -39,11 +35,9 @@ function target = PVset_ANN_Forecast(predictors,shortTermPastData,path)
     end
     result_PV_ANN_premean = result_PV_ANN{1}+result_PV_ANN{2}+result_PV_ANN{3};
     result_PV_ANN_mean = max(result_PV_ANN_premean/3,0);
-    %% Error correction
-    predictors(:,5)=predictors(:,5)-predictors(:,6)*0.25;
-    [result1,result2] = PVset_error_correction_sun(predictors,result_PV_ANN_mean,shortTermPastData,path);
     %% ResultingData File
     ResultingData_ANN(:,1:12) = predictors(:,1:12);
-    ResultingData_ANN(:,13) = result1;
+    ResultingData_ANN(:,13) = result_PV_ANN_mean;
     target = ResultingData_ANN(1:time_steps,13);
+    end_ANN_Forecast = toc(start_ANN_Forecast)
 end
