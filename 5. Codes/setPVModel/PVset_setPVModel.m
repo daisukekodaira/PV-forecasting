@@ -37,6 +37,8 @@ function flag = PVset_setPVModel(LongTermPastData)
         y_ValidEstIndv(1).data(:,day) = PVset_kmeans_Forecast(valid_predictor, short_past_load, path);
         y_ValidEstIndv(2).data(:,day) = PVset_ANN_Forecast(valid_predictor, short_past_load, path);
         y_ValidEstIndv(3).data(:,day) = PVset_LSTM_Forecast(valid_predictor,short_past_load, path);
+        y_ValidEstIndv(4).data(:,day) = PVset_optical_flow(valid_predictor,short_past_load, path);
+        
     end
     close(g)
     %% Optimize the coefficients for the additive model
