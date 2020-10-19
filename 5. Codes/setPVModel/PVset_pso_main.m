@@ -15,13 +15,13 @@ function coeff = PVset_pso_main(y_predict, y_true)
         end
     end   
    % Restructure the target data
-   for day = 1:days
-       initial = 1+(day-1)*96;
-       for hour = 1:24    
-           yTarget(hour).data(1+(day-1)*4:4*day,1) = reshape(y_true(initial+(hour-1)*4:initial-1+hour*4,:), [],1); 
-       end
-   end
-                % Essential paramerters for PSO performance
+    for day = 1:days
+        initial = 1+(day-1)*96;
+        for hour = 1:24    
+            yTarget(hour).data(1+(day-1)*4:4*day,1) = reshape(y_true(initial+(hour-1)*4:initial-1+hour*4,:), [],1); 
+        end
+    end
+    % Essential paramerters for PSO performance
     for hour = 1:24
         g_y_predict = yPredict(hour).data;
         g_y_true = yTarget(hour).data;
