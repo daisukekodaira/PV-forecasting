@@ -227,7 +227,7 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData, resultdata)
       %% Get Deterministic prediction result                 
       % four method
             [~,numCols]=size(coeff(1,:));
-            for predict_time=11:18
+            for predict_time=10:17
                 for hour = 1:24
                     if hour==predict_time                       
                             for i = 1:numCols+1 
