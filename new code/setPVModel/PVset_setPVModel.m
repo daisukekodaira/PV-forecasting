@@ -16,7 +16,7 @@ function flag = PVset_setPVModel(LongTermPastData)
     end
     %% Devide the data into training and validation
     [row,~]=size(longPastdata);
-    for PV_ID=1:27
+    for PV_ID=5:27
         m=1;
         for n=1:row
             if longPastdata(n,1)==PV_ID
@@ -33,6 +33,7 @@ function flag = PVset_setPVModel(LongTermPastData)
         PVset_ANN_Train(longPast, path);     
         PVset_LSTM_train(longPast, path);
     %% Validate the performance of each model
+        start_Forecast = tic;
         g=waitbar(0,'PVset Forecasting(forLoop)','Name','PVset Forecasting(forLoop)');   
         for day = 1:ValidDays 
             waitbar(day/ValidDays,g,'PVset Forecasting(forLoop)');
@@ -46,7 +47,8 @@ function flag = PVset_setPVModel(LongTermPastData)
             y_ValidEstIndv(3).data(:,day) = PVset_LSTM_Forecast(valid_predictor,short_past_load, path);
             y_ValidEstIndv(4).data(:,day) = PVset_opticalflow_Forecast(valid_predictor_opticalflow,short_past_load_opticalflow, path);
         end
-        close(g)        
+        close(g)  
+        end_Forecast = toc(start_Forecast)
     %% Optimize the coefficients for the additive model
         PVset_pso_main(y_ValidEstIndv, valid_data(:,[1 end]),path); 
     %% Integrate individual forecasting algorithms

@@ -66,16 +66,9 @@ function PVset_pso_main(y_predict, y_true, path)
         total_err = err1+100*err2;
     end
 %% save file
-    s1 = 'PV_pso_coeff_';
-    s2 = 'PV_pso_coeff4_';
-    s3 = num2str(y_true(1,1)); % Get building index
-    name(1).string = strcat(s1,s3);
-    name(2).string = strcat(s2,s3);
-    varX(1).value = 'coeff';
-    varX(2).value = 'coeff4';
-    for i = 1:size(varX,2)
-        matname = fullfile(path,[name(i).string '.mat']);
-        save(matname, varX(i).value);
-    end
+    save_name='\PV_pso_coeff_';
+    building_num = num2str(y_true(1,1)); % Get building index
+    save_name = strcat(path,save_name,building_num,'.mat');
+    save(save_name,'coeff','coeff4')
     end_pso_main = toc(start_pso_main)
 end

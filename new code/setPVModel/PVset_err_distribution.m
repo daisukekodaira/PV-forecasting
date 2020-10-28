@@ -1,17 +1,11 @@
     %% Integrate individual forecasting algorithms
     function PVset_err_distribution(y_ValidEstIndv,valid_data,valid_predictors,ValidDays,path)
+        start_err_distribution = tic;   
         %% load file
-        L1 = 'PV_pso_coeff_';
-        L2 = 'PV_pso_coeff4_';
-        L3 = num2str(valid_data(1,1)); % Get building index
-        name(1).string = strcat(L1,L3);
-        name(2).string = strcat(L2,L3);
-        varX(1).value = 'coeff';
-        varX(2).value = 'coeff4';
-        for i = 1:size(varX,2)
-            matname = fullfile(path,[name(i).string '.mat']);
-            load(matname, varX(i).value);
-        end
+        building_num = num2str(valid_data(2,1));
+        load_name = '\PV_pso_coeff_';
+        load_name = strcat(path,load_name,building_num,'.mat');
+        load(load_name,'-mat');
         %% three method
         % integrate into one ensemble forecasting model with optimal coefficients
         [~,numCols]=size(coeff(1,:));
@@ -90,15 +84,9 @@
             end
         end 
        %% save file
-        s1 = 'PV_err_distribution_3_';
-        s2 = 'PV_err_distribution_4_';
-        s3 = num2str(valid_data(1,1)); % Get building index
-        name(1).string = strcat(s1,s3);
-        name(2).string = strcat(s2,s3);
-        varX(1).value = 'err_distribution_3';
-        varX(2).value = 'err_distribution_4';
-        for i = 1:size(varX,2)
-            matname = fullfile(path,[name(i).string '.mat']);
-            save(matname, varX(i).value);
-        end
+        save_name='\PV_err_distribution_';
+        building_num = num2str(valid_data(1,1)); % Get building index
+        save_name = strcat(path,save_name,building_num,'.mat');
+        save(save_name,'err_distribution_3','err_distribution_4')
+        end_err_distribution = toc(start_err_distribution)
     end
