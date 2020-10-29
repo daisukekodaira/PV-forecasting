@@ -25,7 +25,7 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData, resultdata)
     for n=1:row_pre/48
         predictors([48*n-47:48*n],5)=transpose([0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7 8 8 9 9 10 10 11 11 12 12 13 13 14 14 15 15 16 16 17 17 18 18 19 19 20 20 21 21 22 22 23 23]) ;
     end
-    for PV_ID=1:4
+    for PV_ID=1:27
         m=1;
         i=1;
         k=1;
@@ -129,7 +129,7 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData, resultdata)
         boundaries_3 =  [L_boundary_3, U_boundary_3];   
         % display graph
         Number=num2str(PV_ID);
-        graphname_Combined_3=strcat('Combined the results of the three predictions ',Number);
+        graphname_Combined_3=strcat('Combined the results without optical flow ',Number);
         graphname_kmeans=strcat('k-means for forecast data ',Number);
         graphname_ANN=strcat('ANN for forecast data ',Number);
         graphname_LSTM=strcat('LSTM for forecast data ',Number);
@@ -273,15 +273,15 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData, resultdata)
             boundaries_4 =  [L_boundary_4, U_boundary_4];  
         % display graph
             Number=num2str(PV_ID);
-            graphname_Combined_4=strcat('Combined the results of the four predictions',Number);
+            graphname_Combined_4=strcat('Combined the results with optical flow',Number);
             PVget_graph_desc(xtime, yDetermPred4, observed, boundaries_4, graphname_Combined_4, ci_percentage,max_xtime); % Combined 
         % predict time 
             L_Predict_time=num2str(predict_time-1.5);
             U_Predict_time=num2str(predict_time-1);
             Xtime=(predict_time-2.5:0.5:predict_time)';
             max_xtime=predict_time;
-            graphname_predict_time_3=strcat('Combined the results of the three predictions ',Number,'(predict time',L_Predict_time,'~',U_Predict_time,' ) ');
-            graphname_predict_time_4=strcat('Combined the results of the four predictions ',Number,'(predict time',L_Predict_time,'~',U_Predict_time,' ) ');
+            graphname_predict_time_3=strcat('Combined the results without optical flow ',Number,'(predict time',L_Predict_time,'~',U_Predict_time,' ) ');
+            graphname_predict_time_4=strcat('Combined the results with optical flow ',Number,'(predict time',L_Predict_time,'~',U_Predict_time,' ) ');
             PVget_graph_desc(Xtime, yDetermPred3((predict_time-2)*2+1:(predict_time+1)*2,1), observed((predict_time-2)*2+1:(predict_time+1)*2,1), boundaries_3((predict_time-2)*2+1:(predict_time+1)*2,:), graphname_predict_time_3, ci_percentage,max_xtime); % Combined 
             PVget_graph_desc(Xtime, yDetermPred4((predict_time-2)*2+1:(predict_time+1)*2,1), observed((predict_time-2)*2+1:(predict_time+1)*2,1), boundaries_4((predict_time-2)*2+1:(predict_time+1)*2,:), graphname_predict_time_4, ci_percentage,max_xtime); % Combined  
          % Cover Rate of PI (four method)
@@ -367,18 +367,18 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData, resultdata)
     data=array2table(data);
     data.Properties.VariableNames{'data1'} = 'ID';
     data.Properties.VariableNames{'data2'} = 'predict_time';
-    data.Properties.VariableNames{'data3'} = 'PICoverRate_3';
-    data.Properties.VariableNames{'data4'} = 'PICoverRate_4';
-    data.Properties.VariableNames{'data5'} = 'PICoverRate_3_predict_time';
-    data.Properties.VariableNames{'data6'} = 'PICoverRate_4_predict_time';
-    data.Properties.VariableNames{'data7'} = 'RMSE(combined the results of the three predictions)';
-    data.Properties.VariableNames{'data8'} = 'RMSE(combined the results of the four predictions)';
+    data.Properties.VariableNames{'data3'} = 'PICoverRate(without optical flow)';
+    data.Properties.VariableNames{'data4'} = 'PICoverRate(with optical flow)';
+    data.Properties.VariableNames{'data5'} = 'PICoverRate_predict_time(without optical flow)';
+    data.Properties.VariableNames{'data6'} = 'PICoverRate_predict_time(with optical flow)';
+    data.Properties.VariableNames{'data7'} = 'RMSE(combined the results without optical flow)';
+    data.Properties.VariableNames{'data8'} = 'RMSE(combined the results with optical flow)';
     data.Properties.VariableNames{'data9'} = 'RMSE(kmeans)';
     data.Properties.VariableNames{'data10'} = 'RMSE(ANN)';
     data.Properties.VariableNames{'data11'} = 'RMSE(LSTM)';
     data.Properties.VariableNames{'data12'} = 'RMSE(opticalflow)';
-    data.Properties.VariableNames{'data13'} = 'RMSE(combined the three predictions (predict time))';
-    data.Properties.VariableNames{'data14'} = 'RMSE(combined the four predictions (predict time))';
+    data.Properties.VariableNames{'data13'} = 'RMSE(combined the results without optical flow (predict time))';
+    data.Properties.VariableNames{'data14'} = 'RMSE(combined the results with optical flow (predict time))';
     savename=strcat('RMSE&CoverRate.csv');
     writetable(data,savename) 
     toc; 
