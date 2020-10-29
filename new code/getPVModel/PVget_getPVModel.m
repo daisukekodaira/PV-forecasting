@@ -18,7 +18,6 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData, resultdata)
         return
     end     
     target = csvread('TargetData.csv',1,0);   
-    [row_m,~]=size(short_past_load);
     [row_i,~]=size(predictors);
     [row_k,~]=size(target);
     [row_pre,~]=size(predictors);
@@ -26,15 +25,8 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData, resultdata)
         predictors([48*n-47:48*n],5)=transpose([0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7 8 8 9 9 10 10 11 11 12 12 13 13 14 14 15 15 16 16 17 17 18 18 19 19 20 20 21 21 22 22 23 23]) ;
     end
     for PV_ID=1:27
-        m=1;
         i=1;
         k=1;
-        for n=1:row_m
-            if short_past_load(n,1)==PV_ID
-               shortTermPastData(m,:)=short_past_load(n,:);
-               m=m+1;
-            end
-        end
         for n=1:row_i
             if predictors(n,1)==PV_ID
                ForecastData(i,:)=predictors(n,:);
@@ -51,7 +43,7 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData, resultdata)
         opticalflow_Forecast=targetdata(:,3);
     %% Load .mat files from given path of "shortTermPastData"
         filepath = fileparts(ShortTermPastData);
-        buildingIndex = shortTermPastData(1,1);    
+        buildingIndex = targetdata(1,1);    
     %% Error recognition: Check if mat files exist
         name1 = [filepath, '\', 'PV_Model_', num2str(buildingIndex), '.mat'];
         name2 = [filepath, '\', 'PV_err_distribution_', num2str(buildingIndex), '.mat'];
@@ -71,10 +63,10 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData, resultdata)
             load(load_name,'-mat');
         end
     %% Prediction for test data   
-        predicted_PV(1).data = PVget_kmeans_Forecast(ForecastData, shortTermPastData, filepath);   
-        predicted_PV(2).data = PVget_ANN_Forecast(ForecastData, shortTermPastData, filepath);   
-        predicted_PV(3).data = PVget_LSTM_Forecast(ForecastData,shortTermPastData, filepath);   
-        predicted_PV(4).data = PVget_opticalflow_Forecast(opticalflow_Forecast,shortTermPastData, filepath);     
+        predicted_PV(1).data = PVget_kmeans_Forecast(ForecastData,  filepath);   
+        predicted_PV(2).data = PVget_ANN_Forecast(ForecastData, filepath);   
+        predicted_PV(3).data = PVget_LSTM_Forecast(ForecastData, filepath);   
+        predicted_PV(4).data = PVget_opticalflow_Forecast(opticalflow_Forecast, filepath);     
 %% three method
     %% Get Deterministic prediction result   
         [~,numCols]=size(coeff(1,:));

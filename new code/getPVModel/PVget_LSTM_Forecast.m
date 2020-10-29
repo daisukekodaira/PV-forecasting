@@ -1,4 +1,4 @@
-function result = PVget_LSTM_Forecast(input,~,path)
+function result = PVget_LSTM_Forecast(input,path)
 % PV prediction: LSTM Model Forecast algorithm
 %% load .mat file
 Forecastdata = input;

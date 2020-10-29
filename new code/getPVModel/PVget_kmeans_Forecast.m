@@ -1,4 +1,4 @@
-function predictedPVGen = PVget_kmeans_Forecast(ForecastData, ~, path)
+function predictedPVGen = PVget_kmeans_Forecast(ForecastData, path)
 %% load .mat file
 building_num = num2str(ForecastData(2,1));
 load_name = '\PV_Model_';
