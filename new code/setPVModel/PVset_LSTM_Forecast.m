@@ -1,8 +1,7 @@
 function result_LSTM = PVset_LSTM_Forecast(input,~,path)
-start_LSTM_Forecast = tic;
 % PV prediction: LSTM Model Forecast algorithm
 %% load .mat file
-Forecastdata = input;
+Forecastdata = input(:,[1:4 7:13]);
 building_num = num2str(Forecastdata(2,1));
 load_name = '\PV_LSTM_';
 load_name = strcat(path,load_name,building_num,'.mat');
@@ -16,7 +15,7 @@ numTimeStepsTest = size(XTest1,2);
 for i = 1:numTimeStepsTest
     [solar_net,YPred_solar(:,i+48)] = predictAndUpdateState(solar_net,XTest1(:,i),'ExecutionEnvironment','auto');
 end
-Forecastdata(:,12)=YPred_solar(48+1:end)';
+Forecastdata(:,14)=YPred_solar(48+1:end)';
 %% forecast pv
 data2=Forecastdata(:,predictorscol2);
 XTest2 =((data2 - meandata(predictorscol2))./sigdata(predictorscol2))';
@@ -32,4 +31,3 @@ for i=1:size(result_LSTM,1)
         result_LSTM(i)=0;
     end
 end
-end_LSTM_Forecast = toc(start_LSTM_Forecast)

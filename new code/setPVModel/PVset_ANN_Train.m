@@ -1,7 +1,7 @@
 function target = PVset_ANN_Train(LongTermpastData,path)
 start_ANN_Train = tic;
 %% PastData
-PastData_ANN = LongTermpastData(1:(end-48*7),1:13); % PastData load
+PastData_ANN = LongTermpastData(1:(end-48*7),[1:4 7:15]); % PastData load
 [m_PastData_ANN, ~] = size(PastData_ANN);  
 %% set featur
 %  P1(Humidity), P2(WindSpeed),  P3(Temperature), P4(cloud),P5(rain), P6(solarirradiation)

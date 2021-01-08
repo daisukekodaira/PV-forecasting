@@ -1,7 +1,7 @@
 function PVset_kmeans_Train(LongTermpastData, path)
 start_kmeans_Train = tic;
 %% Load data
-Past_Load_dataData = LongTermpastData(:,1:13); % PastData load
+Past_Load_dataData = LongTermpastData(:,[1:4 7:15]); % PastData load
 %% normalize
 % Data such as time, irradiation, etc. have high variance. so i normalize
 max_value = max(Past_Load_dataData(:,7:12));
@@ -13,7 +13,7 @@ predata=dataTrainnormalize;
 R=corrcoef(predata(:,1:13));
 k=1;m=1;
 for i=1:size(R,1)
-    if abs(R(end-1,i))>0.25 && i< size(R,2)-1
+    if abs(R(end-1,i))>0.25 && i<size(R,2)-1
     predictor_sun(k)=i;
     k=k+1;
     end
@@ -23,7 +23,7 @@ for i=1:size(R,1)
     end
 end
 %% Kmeans clustering for forecast sunlight data
-past_feature_sunlight = horzcat(dataTrainnormalize(:,[3 5]), dataTrainnormalize(:,predictor_sun)); % combine 1~5 columns & 9,10 columns
+past_feature_sunlight = horzcat(dataTrainnormalize(:,[3 5 6]), dataTrainnormalize(:,predictor_sun)); % combine 1~5 columns & 9,10 columns
 past_load_sunlight = dataTrainnormalize(:,12);
 % Set K for sunlight. 20 is experimentally chosen by gyeong gak. 
 % originally this value is 50
@@ -33,7 +33,7 @@ nb_sunlight = fitcnb(past_feature_sunlight, idx_sunlight,'Distribution','kernel'
 %% Patterning data
 % 1:Building index , 2:Date, 3:Day of Week,  4:Holiday,  5:Temparature,
 %  6:Cloud, 7:Rain 8:SolarIrradiance,  9~104:Generation
-Patterned_PastData = PVset_Format_Change(dataTrainnormalize);
+Patterned_PastData = PVset_Format_Change(dataTrainnormalize,LongTermpastData);
 %% Train model
 Feature =horzcat(2,predictor_ger-4);
 [days, ~] = size(Patterned_PastData);

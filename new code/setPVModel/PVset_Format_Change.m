@@ -2,19 +2,19 @@
 % 1 colunm demand -> 96 colunm demand
 % year,month,day -> 2 colunm    predictor(7~12 colunm at data)-> 3~8 
 % generation(13 colunm)- >9~104 sequence
-function y = PVset_Format_Change(input_data)
-    start_Format_Change = tic;
+function y = PVset_Format_Change(input_data,LongTermpastData)
     new_format_PastData = input_data;
     % check again the size of new_version_PastData because of copy
     [m_new_format_PastData, ~] = size(new_format_PastData);
     % Demand data
     j = 1;
     old_format_PastData = zeros(round(m_new_format_PastData/48),56);
+    
     for i = 1:1:m_new_format_PastData
-        if new_format_PastData(i,5) == 0 
+        if LongTermpastData(i,5) == 0 
             old_format_PastData(j,8 + 48) = new_format_PastData(i,13);
         else
-            old_format_PastData(j,8 + (new_format_PastData(i,5)*2)) = new_format_PastData(i,13);
+            old_format_PastData(j,8 + (LongTermpastData(i,5)*2)) = new_format_PastData(i,13);
         end
         if i == m_new_format_PastData
         else
@@ -46,5 +46,4 @@ function y = PVset_Format_Change(input_data)
             end
         end
     end
-    end_Format_Change = toc(start_Format_Change)
     y=old_format_PastData;
