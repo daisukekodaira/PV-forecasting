@@ -1,7 +1,7 @@
 % -----------------------------------------------------------------
 % This function is only for debugging
 % -------------------------------------------------------------------
-function PVget_graph_desc(x, y_pred, y_true, boundaries, name, ci_percentage,max_xtime)     
+function PVget_graph_desc(x, y_pred, y_true, boundaries, name, max_xtime)     
     %% CHANGE hour and value
     %     if you want see  0 to 23 graph 
     t=0;   
@@ -36,9 +36,8 @@ function PVget_graph_desc(x, y_pred, y_true, boundaries, name, ci_percentage,max
         plot(x,boundaries(:,1),'b--','LineWidth',0.7);
         plot(x,boundaries(:,2),'b--','LineWidth',0.7);
     end
-    CI = 100*(1-ci_percentage);
     xlabel('Time [h]');
     ylabel('Generation [kW]');
     title(name);
-    legend('predicted Load', 'True', [num2str(CI) '% Prediction Interval']);
+    legend('predicted Load', 'True', ' Prediction Interval');
 end

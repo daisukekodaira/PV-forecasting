@@ -1,13 +1,14 @@
-function target = PVget_ANN_Forecast(predictors,path)    
+function target = PVget_ANN_Forecast(predictor,path)    
 % Seung Hyeon made this code first 
 % 2019/10/15 modified by Gyeonggak Kim (kakkyoung2@gmail.com)
 % fix error & change predictor   
-    %% load .mat file
-    building_num = num2str(predictors(2,1));
+    %% load .mat file   
+    building_num = num2str(predictor(2,1));
     load_name = '\PV_fitnet_ANN_';
     load_name = strcat(path,load_name,building_num,'.mat');
     load(load_name,'-mat');
     %% ForecastData
+    predictors=predictor(:,[1:4 7:13]);
     predictors( ~any(predictors,2), : ) = []; 
     [time_steps, ~]= size(predictors);
    %% Forecast solar using ANN

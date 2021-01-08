@@ -1,7 +1,7 @@
 function result = PVget_LSTM_Forecast(input,path)
 % PV prediction: LSTM Model Forecast algorithm
 %% load .mat file
-Forecastdata = input;
+Forecastdata = input(:,[1:4 7:13]);
 building_num = num2str(Forecastdata(2,1));
 load_name = '\PV_LSTM_';
 load_name = strcat(path,load_name,building_num,'.mat');
