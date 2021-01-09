@@ -4,8 +4,9 @@ function flag = PVset_setPVModel(LongTermPastData)
     %% Get file path
     path = fileparts(LongTermPastData);
     %% parameters
-    ValidDays = 30; % it must be above 1 day. 3days might provide the best performance
-    n_valid_data = 48*ValidDays; % 24*2*day
+    PVset_parameters;
+    ValidDays = 30; % it must be more than 1 day
+    n_valid_data = 48*ValidDays; % total records = 24[hours]*2[record/hour]*days
     %% Load data
     if strcmp(LongTermPastData,'NULL') == 0    % if the filename is not null
         longPastdata = readmatrix(LongTermPastData);
@@ -15,18 +16,21 @@ function flag = PVset_setPVModel(LongTermPastData)
         return
     end
     %% Devide the data into training and validation
+    % Transform the date into sin and cos form
     [row,~]=size(longPastdata);
     sin_data(:,1) = sin(longPastdata(:,5)/12*pi);
     cos_data(:,1) = cos(longPastdata(:,5)/12*pi);
     longPastdata=horzcat(longPastdata(:,1:6),sin_data,cos_data,longPastdata(:,7:14));
-    for PV_ID=15:27
+    
+%     for PV_ID=15:27
+    for PV_ID=1:1
         m=1;
         for n=1:row
             if longPastdata(n,1)==PV_ID
                longPast(m,:)=longPastdata(n,:);
                m=m+1;
             end
-        end    
+        end
         valid_data = longPast(end-n_valid_data+1:end, 1:15); 
         train_data = longPast(1:end-n_valid_data, 1:15); 
         valid_predictors = longPast(end-n_valid_data+1:end, 1:end-2);
