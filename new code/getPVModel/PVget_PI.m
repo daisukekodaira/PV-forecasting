@@ -6,7 +6,7 @@ function [lwBound, upBound] = PVget_PI(ForecastData,yDetermPred,path)
     load_name = strcat(path,load_name,building_num,'.mat');
     load(load_name,'-mat');
     %% create PI
-    test_data = (horzcat(ForecastData(1:48,7:8),yDetermPred))';
+    test_data = (yDetermPred)';
     UBLB_net = predictAndUpdateState(UBLB_net,test_data);
     [UBLB_net,YPred_solar(:,1:48)] = predictAndUpdateState(UBLB_net,test_data(:,end-48+1:end));
     numTimeStepsTest = size(test_data,2);
