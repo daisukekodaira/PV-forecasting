@@ -4,64 +4,62 @@ function flag = PVset_setPVModel(LongTermPastData)
     %% Get file path
     path = fileparts(LongTermPastData);
     %% parameters
-    Params = PVset_getParameters;
-    ValidDays = Params.validDays; % it must be more than 1 day
-    n_valid_data = 48*ValidDays; % total records = 24[hours]*2[record/hour]*days
+    test_days = 30; % it must be above 1 day. 3days might provide the best performance
+    first_ID=15;
     %% Load data
     if strcmp(LongTermPastData,'NULL') == 0    % if the filename is not null
         longPastdata = readmatrix(LongTermPastData);
-        longPastdata = longPastdata(1:end,:);
     else  % if the fine name is null
         flag = -1; 
         return
     end
     %% Devide the data into training and validation
-    % Transform the date into sin and cos form
-    [row,~]=size(longPastdata);
+    [row_L,~]=size(longPastdata);
+    for i=1:row_L
+        if longPastdata(i,10) == 0 || longPastdata(i,10) == 1 || longPastdata(i,10) == 2 
+            longPastdata(i,10) = 0; %% sunny
+        elseif longPastdata(i,10) == 4 || longPastdata(i,10) == 5
+            longPastdata(i,10) = 1; %% Sunny, sometimes cloudy
+        elseif longPastdata(i,10) > 5
+            longPastdata(i,10) = 3; %% cloudy or rain
+        end
+    end
     sin_data(:,1) = sin(longPastdata(:,5)/12*pi);
     cos_data(:,1) = cos(longPastdata(:,5)/12*pi);
-    longPastdata=horzcat(longPastdata(:,1:6),sin_data,cos_data,longPastdata(:,7:14));
-    
-%     for PV_ID=15:27
-    for PV_ID=1:1
+    longPastdata=horzcat(longPastdata(:,1:6),sin_data,cos_data,longPastdata(:,9:14)); % remove mois and wind
+    for PV_ID=first_ID:27
         m=1;
-        for n=1:row
+        for n=1:row_L
             if longPastdata(n,1)==PV_ID
                longPast(m,:)=longPastdata(n,:);
                m=m+1;
             end
-        end
-        valid_data = longPast(end-n_valid_data+1:end, 1:15); 
-        train_data = longPast(1:end-n_valid_data, 1:15); 
-        valid_predictors = longPast(end-n_valid_data+1:end, 1:end-2);
-        valid_data_opticalflow = longPast(end-n_valid_data+1:end, [1:14,16]);
+        end             
+        long_test_data = longPast(1:48*test_days,:);
+        train_data = longPast(48*test_days+1:end,:);
     %% Train each model using past load data
-        PVset_kmeans_Train(longPast, path);   
-        PVset_ANN_Train(longPast, path);     
-        PVset_LSTM_train(longPast, path);
-    %% Validate the performance of each model
+        PVset_kmeans_Train(train_data, path);   
+        PVset_ANN_Train(train_data, path);     
+        PVset_LSTM_train(train_data, path);
+    %% Validate the performance of each model (test)
         start_Forecast = tic;
-        for day = 1:ValidDays 
-            TimeIndex = size(train_data,1)+1+48*(day-1);  % Indicator of the time instance for validation data in past_load, 
-            short_past_load = longPast(TimeIndex-48*7+1:TimeIndex, 1:15); % size of short_past_load is always "672*11" for one week data set
-            short_past_load_opticalflow = longPast(TimeIndex-48*7+1:TimeIndex, [1:14,16]);
-            valid_predictor = valid_predictors(1+(day-1)*48:day*48, 1:end);  % predictor for 1 day (96 data instances)
-            valid_predictor_opticalflow = valid_data_opticalflow(1+(day-1)*48:day*48, :);
-            y_ValidEstIndv(1).data(:,day) = PVset_kmeans_Forecast(valid_predictor, short_past_load, path);
-            y_ValidEstIndv(2).data(:,day) = PVset_ANN_Forecast(valid_predictor, short_past_load, path);
-            y_ValidEstIndv(3).data(:,day) = PVset_LSTM_Forecast(valid_predictor,short_past_load, path);
-            y_ValidEstIndv(4).data(:,day) = PVset_opticalflow_Forecast(valid_predictor_opticalflow,short_past_load_opticalflow, path);
+        for day = 1:test_days 
+            short_test_data = long_test_data(48*day-47:48*day,:);
+            y_ValidEstIndv(1).data(:,day) = PVset_kmeans_Forecast(short_test_data,  path);
+            y_ValidEstIndv(2).data(:,day) = PVset_ANN_Forecast(short_test_data,  path);
+            y_ValidEstIndv(3).data(:,day) = PVset_LSTM_Forecast(short_test_data, path);
+            y_ValidEstIndv(4).data(:,day) = short_test_data(:,end);
         end
         end_Forecast = toc(start_Forecast)
     %% Optimize the coefficients for the additive model
-        PVset_pso(y_ValidEstIndv, valid_data(:,[1 end]),path); 
+        PVset_pso_main(y_ValidEstIndv, long_test_data(:,[1 end-1]),path); 
     %% Integrate individual forecasting algorithms
-        PVset_err_distribution(y_ValidEstIndv,valid_data,train_data,path);
+        PVset_err_distribution(y_ValidEstIndv,long_test_data(:,1:end-1),train_data,path);
         flag = 1;    % Return 1 when the operation properly works
         clearvars longPast;
-        clearvars valid_data;
+        clearvars long_test_data;
         clearvars train_data;
-        clearvars valid_predictors;
+        clearvars short_test_data;
     end
     end_all = toc(start_all)
 end

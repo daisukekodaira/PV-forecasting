@@ -15,16 +15,16 @@
                 if i == 1
                    y_est(1+(hour-1)*2:hour*2,:) = coeff(hour,i).*y_ValidEstIndv(i).data(1+(hour-1)*2:hour*2,:);
                 else
-                   y_est(1+(hour-1)*2:hour*2,:) = y_est(1+(hour-1)*2:hour*2,:) + coeff(hour,i).*y_ValidEstIndv(i).data(1+(hour-1)*2:hour*2,:);  
+                   y_est(1+(hour-1)*2:hour*2,:) = y_est(1+(hour-1)*2:hour*2,:) + coeff(hour,i).*y_ValidEstIndv(i).data(1+(hour-1)*2:hour*2,:);  % from valid_data
                 end
             end
         end       
         for i=1:size(train_data,1)/48
-            past_data(1:48,i) = train_data(48*i-47:48*i,15); % forecast generation
+            past_data(1:48,i) = train_data(48*i-47:48*i,end-1); % generation (30 days) from train_data
         end
         Past_Data = past_data(1:48,end-29:end);
         for i=1:30
-            actual_measurements(:,i) = valid_data(48*i-47:48*i,15); % Actual measurement generation
+            actual_measurements(:,i) = valid_data(48*i-47:48*i,end); % Actual measurement generation , valid_data is test data
         end
         percentage = 0.05;
         SE = sqrt(var(Past_Data,0,2)); 
@@ -64,18 +64,13 @@
         pso_boundary = boundary(48*(m-1)+1:48*m,:);
         numFeatures = size(train_data,1); % Number of input layer
         numResponses = 2; % Number of output layer
-        ub1 = [Inf;Inf];
-        lb1 = [-Inf;-Inf];       
-        options_pso = optimoptions('particleswarm', ...
-                                                      'MaxIterations',2500, ...
-                                                      'FunctionTolerance', 1e-25, ...
-                                                      'MaxStallIterations', 2000, ...
-                                                      'Display', 'none', ...
-                                                      'ObjectiveLimit',0.8);
+        ub1 = [2,0.8];
+        lb1 = [1.2,0];       
+        options_pso = optimoptions('particleswarm', 'MaxIterations',2500,'FunctionTolerance', 1e-25, 'MaxStallIterations', 2000,'Display', 'none','ObjectiveLimit',0.8);
         options = trainingOptions('adam', ...
-                                                  'MaxEpochs',1, ...
-                                                  'LearnRateSchedule','piecewise', ...
-                                                  'Verbose',0);        % training option
+            'MaxEpochs',1, ...
+            'LearnRateSchedule','piecewise', ...
+            'Verbose',0);        % training option
         test_data = (y_est(:,m))';
         %% decide weight
             objFunc = @(weight) objectiveFunc(weight, y_est(:,m));

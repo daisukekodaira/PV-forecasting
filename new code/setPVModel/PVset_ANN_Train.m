@@ -1,7 +1,7 @@
 function target = PVset_ANN_Train(LongTermpastData,path)
 start_ANN_Train = tic;
 %% PastData
-PastData_ANN = LongTermpastData(1:(end-48*7),[1:4 7:15]); % PastData load
+PastData_ANN = LongTermpastData(1:(end-48*7),[1:4 7:end-1]); % PastData load
 [m_PastData_ANN, ~] = size(PastData_ANN);  
 %% set featur
 %  P1(Humidity), P2(WindSpeed),  P3(Temperature), P4(cloud),P5(rain), P6(solarirradiation)
@@ -17,12 +17,12 @@ for i=1:size(R,1)
         m=m+1;
     end
 end
-feature1 =[5 predictor_sun];
-feature2 =[5 predictor_ger];
+feature1 =[5 6 7 8 9];
+feature2 =[5 6 7 8 9 10];
 %% Train solar model
 for i_loop = 1:3
     x_solar_ANN = transpose(PastData_ANN(1:m_PastData_ANN,feature1)); % input(feature)
-    t_solar_ANN = transpose(PastData_ANN(1:m_PastData_ANN,12)); % target
+    t_solar_ANN = transpose(PastData_ANN(1:m_PastData_ANN,end-1)); % target
     % Create and display the network
     net_solar_ANN = fitnet([20,20,20,20,15],'trainscg');
     net_solar_ANN.trainParam.showWindow = false;
@@ -33,7 +33,7 @@ end
 for i_loop = 1:3
     trainDay_ANN =m_PastData_ANN;
     x_PV_ANN = transpose(PastData_ANN(1:trainDay_ANN,feature2)); % input(feature)
-    t_PV_ANN = transpose(PastData_ANN(1:trainDay_ANN,13)); % target
+    t_PV_ANN = transpose(PastData_ANN(1:trainDay_ANN,end)); % target
     % Create and display the network
     net_PV_ANN = fitnet([30,20,20,20,15],'trainscg');
     net_PV_ANN.trainParam.showWindow = false;

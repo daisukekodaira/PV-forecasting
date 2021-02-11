@@ -1,15 +1,14 @@
 function PVset_LSTM_train(input,path)
 start_LSTM_train = tic;
 % PV prediction: LSTM Model Forecast algorithm
-%% Get parameters
-Params = PVset_getParameters;
-traindays = Params.validDays;
+%% LOAD DATA
+traindays=30;
 %% devide data (train,vaild)
-predata = input(end-48*traindays+1:end,[1:4 7:15]);
+predata = input(end-48*traindays+1:end,[1:4 7:end-1]);
 meandata = mean(predata);
 sigdata = std(predata); 
-if sigdata(11)==0 % in case of rain, its valus is usually 0. so it make NAN value
-    sigdata(11)=1;
+if sigdata(9)==0 % in case of rain, its valus is usually 0. so it make NAN value
+    sigdata(9)=1;
 end
 dataTrainStandardized = (predata - meandata) ./ sigdata;
 R=corrcoef(predata(:,:));
@@ -25,9 +24,9 @@ for i=1:size(R,1)
     end
 end
 %% train lstm (solar)
-predictorscol1=[5 predictor_sun];
+predictorscol1=[5 6 7 8 9];
 XTrain1=(dataTrainStandardized(:,predictorscol1))';
-YTrain1=(dataTrainStandardized(:,12))';
+YTrain1=(dataTrainStandardized(:,end-1))';
 %lstm
 numFeatures = size(predictorscol1,2);
 numResponses = 1;
@@ -55,9 +54,9 @@ options = trainingOptions('adam', ...
     'Verbose',0);
 solar_net = trainNetwork(XTrain1,YTrain1,layers,options);
 %% train lstm (generation)
-predictorscol2=[5 predictor_ger];
+predictorscol2=[5 6 7 8 9 10];
 XTrain2=(dataTrainStandardized(:,predictorscol2))';
-YTrain2=(dataTrainStandardized(:,13))';
+YTrain2=(dataTrainStandardized(:,end))';
 %lstm
 numFeatures = size(predictorscol2,2);
 layers = [ ...

@@ -1,16 +1,16 @@
 function PVset_kmeans_Train(LongTermpastData, path)
 start_kmeans_Train = tic;
 %% Load data
-Past_Load_dataData = LongTermpastData(:,[1:4 7:15]); % PastData load
+Past_Load_dataData = LongTermpastData(:,[1:4 7:end-1]); % PastData load
 %% normalize
 % Data such as time, irradiation, etc. have high variance. so i normalize
-max_value = max(Past_Load_dataData(:,7:12));
-min_value = min(Past_Load_dataData(:,7:12));
-dataTrainnormalize = (Past_Load_dataData(:,7:12) - min_value) ./ (max_value - min_value);
-dataTrainnormalize = horzcat(Past_Load_dataData(:,1:6),dataTrainnormalize,Past_Load_dataData(:,13)); 
+max_value = max(Past_Load_dataData(:,7:end-1));
+min_value = min(Past_Load_dataData(:,7:end-1));
+dataTrainnormalize = (Past_Load_dataData(:,7:end-1) - min_value) ./ (max_value - min_value);
+dataTrainnormalize = horzcat(Past_Load_dataData(:,1:6),dataTrainnormalize,Past_Load_dataData(:,end)); 
 %% Correlation coefficient
 predata=dataTrainnormalize;
-R=corrcoef(predata(:,1:13));
+R=corrcoef(predata(:,1:end));
 k=1;m=1;
 for i=1:size(R,1)
     if abs(R(end-1,i))>0.25 && i<size(R,2)-1
@@ -24,7 +24,7 @@ for i=1:size(R,1)
 end
 %% Kmeans clustering for forecast sunlight data
 past_feature_sunlight = horzcat(dataTrainnormalize(:,[3 5 6]), dataTrainnormalize(:,predictor_sun)); % combine 1~5 columns & 9,10 columns
-past_load_sunlight = dataTrainnormalize(:,12);
+past_load_sunlight = dataTrainnormalize(:,end-1);
 % Set K for sunlight. 20 is experimentally chosen by gyeong gak. 
 % originally this value is 50
 k_sunlight = 30;
@@ -36,10 +36,10 @@ nb_sunlight = fitcnb(past_feature_sunlight, idx_sunlight,'Distribution','kernel'
 Patterned_PastData = PVset_Format_Change(dataTrainnormalize,LongTermpastData);
 %% Train model
 Feature =horzcat(2,predictor_ger-4);
-[days, ~] = size(Patterned_PastData);
+[days, factor] = size(Patterned_PastData);
 k_pv = 2;
 if days <= 30
-    [idx_PastData,c_PastData_pv] = kmeans(Patterned_PastData(:,9:56),k_pv); % Set index ans class value using k-means
+    [idx_PastData,c_PastData_pv] = kmeans(Patterned_PastData(:,factor-48+1:factor),k_pv); % Set index ans class value using k-means
     train_feature = Patterned_PastData(:,Feature);                       % feature
     train_label = idx_PastData(:,1);                                     % class index
     nb_pv = fitcnb(train_feature,train_label,'Distribution','kernel');       % Bayesian Classification
@@ -53,10 +53,10 @@ else
         raw_30_PastData = Patterned_PastData(m_raw_70_PastData+1:end,:);
             %% validation for selecting otimal k
      for i_loop = 1:3
-        eva = evalclusters(raw_70_PastData(:,9:56),'kmeans','Gap','Klist',[5:15],'B',90,'ReferenceDistribution','uniform','SearchMethod','firstMaxSE');
+        eva = evalclusters(raw_70_PastData(:,factor-48+1:factor),'kmeans','Gap','Klist',[5:15],'B',90,'ReferenceDistribution','uniform','SearchMethod','firstMaxSE');
         k=eva.OptimalK;
             %% k-means past train data
-        [idx_PastData,c_PastData] = kmeans(raw_70_PastData(:,9:56),k);
+        [idx_PastData,c_PastData] = kmeans(raw_70_PastData(:,factor-48+1:factor),k);
         idx_PastData_pv_array{k} = idx_PastData;
         c_PastData_pv_array{k} = c_PastData;
         train_feature = raw_70_PastData(1:end,Feature);                                    % set feature
@@ -71,7 +71,7 @@ else
         end
          %% Calculate err data for selet optimal K
         result_cluster_array{k} = result_cluster;
-        result_err_data_array{k} =  raw_30_PastData(:,9:56) - result_cluster_array{k}; % real - forecast
+        result_err_data_array{k} =  raw_30_PastData(:,factor-48+1:factor) - result_cluster_array{k}; % real - forecast
         abs_err_rate_k{k} = abs(result_err_data_array{k});
         total_err(k)=sum(mean(abs_err_rate_k{k}));
         Optimal_k=find(total_err==min(total_err(k)));                  % Find optimal k which has lowest error

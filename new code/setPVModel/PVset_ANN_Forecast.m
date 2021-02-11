@@ -1,11 +1,11 @@
-function target = PVset_ANN_Forecast(predictor,~,path) 
+function target = PVset_ANN_Forecast(predictor,path) 
     %% load .mat file
     building_num = num2str(predictor(2,1));
     load_name = '\PV_fitnet_ANN_';
     load_name = strcat(path,load_name,building_num,'.mat');
     load(load_name,'-mat');
     %% ForecastData
-    predictors=predictor(:,[1:4 7:13]);
+    predictors=predictor(:,[1:4 7:end-3]);
     predictors( ~any(predictors,2), : ) = []; 
     [time_steps, ~]= size(predictors);
    %% Forecast solar using ANN
@@ -20,7 +20,7 @@ function target = PVset_ANN_Forecast(predictor,~,path)
         result_solar_ANN{i_loop} = result_solar_ANN_loop;
     end
     result_solar_ANN_premean = result_solar_ANN{1}+result_solar_ANN{2}+result_solar_ANN{3};
-    predictors(:,14) = max(result_solar_ANN_premean/3,0);
+    predictors(:,end+1) = max(result_solar_ANN_premean/3,0);
     %% Forecast PV using ANN
     % use ANN 3 times for reduce ANN's error
     for i_loop = 1:3
@@ -35,7 +35,7 @@ function target = PVset_ANN_Forecast(predictor,~,path)
     result_PV_ANN_premean = result_PV_ANN{1}+result_PV_ANN{2}+result_PV_ANN{3};
     result_PV_ANN_mean = max(result_PV_ANN_premean/3,0);
     %% ResultingData File
-    ResultingData_ANN(:,1:14) = predictors(:,1:14);
-    ResultingData_ANN(:,15) = result_PV_ANN_mean;
-    target = ResultingData_ANN(1:time_steps,15);
+    ResultingData_ANN = predictors(:,1:end);
+    ResultingData_ANN(:,end+1) = result_PV_ANN_mean;
+    target = ResultingData_ANN(1:time_steps,end);
 end

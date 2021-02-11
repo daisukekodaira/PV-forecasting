@@ -8,13 +8,13 @@ function y = PVset_Format_Change(input_data,LongTermpastData)
     [m_new_format_PastData, ~] = size(new_format_PastData);
     % Demand data
     j = 1;
-    old_format_PastData = zeros(round(m_new_format_PastData/48),56);
+    old_format_PastData = zeros(round(m_new_format_PastData/48),54);
     
     for i = 1:1:m_new_format_PastData
         if LongTermpastData(i,5) == 0 
-            old_format_PastData(j,8 + 48) = new_format_PastData(i,13);
+            old_format_PastData(j,6 + 48) = new_format_PastData(i,end);
         else
-            old_format_PastData(j,8 + (LongTermpastData(i,5)*2)) = new_format_PastData(i,13);
+            old_format_PastData(j,6 + (LongTermpastData(i,5)*2)) = new_format_PastData(i,end);
         end
         if i == m_new_format_PastData
         else
@@ -28,9 +28,7 @@ function y = PVset_Format_Change(input_data,LongTermpastData)
     old_format_PastData(1:end,1) = new_format_PastData(1,1);
     for i = 1:m_new_format_PastData
         old_format_PastData(j,3) = max(new_format_PastData(:,7));
-        old_format_PastData(j,4) = mean(new_format_PastData(k:i,8));
-        old_format_PastData(j,5) = max(new_format_PastData(:,9));
-        old_format_PastData(j,6:8) = mean(new_format_PastData(k:i,10:12));
+        old_format_PastData(j,4:6) = mean(new_format_PastData(k:i,8:end-1));
         mon=(new_format_PastData(i,3) + round(new_format_PastData(i,4)/30));
         if mon >= 12 || mon < 3  %Winter
             old_format_PastData(j,2) = 1;
