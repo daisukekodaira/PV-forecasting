@@ -4,8 +4,8 @@ function flag = PVset_setPVModel(LongTermPastData)
     %% Get file path
     path = fileparts(LongTermPastData);
     %% parameters
-    PVset_parameters;
-    ValidDays = 30; % it must be more than 1 day
+    Params = PVset_getParameters;
+    ValidDays = Params.validDays; % it must be more than 1 day
     n_valid_data = 48*ValidDays; % total records = 24[hours]*2[record/hour]*days
     %% Load data
     if strcmp(LongTermPastData,'NULL') == 0    % if the filename is not null
@@ -54,7 +54,7 @@ function flag = PVset_setPVModel(LongTermPastData)
         end
         end_Forecast = toc(start_Forecast)
     %% Optimize the coefficients for the additive model
-        PVset_pso_main(y_ValidEstIndv, valid_data(:,[1 end]),path); 
+        PVset_pso(y_ValidEstIndv, valid_data(:,[1 end]),path); 
     %% Integrate individual forecasting algorithms
         PVset_err_distribution(y_ValidEstIndv,valid_data,train_data,path);
         flag = 1;    % Return 1 when the operation properly works

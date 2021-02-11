@@ -1,6 +1,6 @@
 % y_ture: True load [MW]
 % y_predict: predicted load [MW]
-function PVset_pso_main(y_predict, y_true, path)
+function PVset_pso(y_predict, y_true, path)
     start_pso_main = tic;   
     
     %% Calculate optimal weight for each algorithm --------------------------
@@ -10,10 +10,10 @@ function PVset_pso_main(y_predict, y_true, path)
     % 3. LSTM
     % 4. Optical flow
     % ----------------------------------------------------------------------------
-    % 3 methods additive model; NN, k-means, LSTM
+    % Three methods additive model; NN, k-means, LSTM
     numOfMethds = 3; 
     coeff = getWeight(numOfMethds, y_predict, y_true);
-    % 4 (all) methods additive model; NN, k-means, LSTM, Optical flow
+    % Four (all) methods additive model; NN, k-means, LSTM, Optical flow
     numOfMethds = size(y_predict, 2); % Select all algorithms
     coeff4 = getWeight(numOfMethds, y_predict, y_true);
         
@@ -32,7 +32,7 @@ function weight = getWeight(methods, y_predict, y_true)
     % Restructure the predicted data
     for j = 1:methods % the number of prediction methods (k-means and fitnet)
         for hour = 1:hours
-            yPredict(hour).data(:,j) = reshape(y_predict(j).data(1+(hour-1)*2:hour*2,:), [],1); % this global variable is utilized in 'objective_func'
+            yPredict(hour).data(:,j) = reshape(y_predict(j).data(1+(hour-1)*2:hour*2,:), [],1);
         end
     end   
    % Restructure the target data
@@ -47,15 +47,26 @@ function weight = getWeight(methods, y_predict, y_true)
         rng default  % For reproducibility
         lb = zeros(1,methods);
         ub = ones(1,methods);
-        options = optimoptions('particleswarm', 'MaxIterations',2000,'FunctionTolerance', 1e-25, 'MaxStallIterations', 1500,'Display', 'none');
+        options = optimoptions('particleswarm', ...
+                                              'MaxIterations',2000, ...
+                                              'FunctionTolerance', 1e-25, ...
+                                              'MaxStallIterations', 1500, ...
+                                              'Display', 'none');
         objFunc = @(weight) objectiveFunc(weight, yPredict(hour).data, yTarget(hour).data);
         [weight(hour, :),~,~,~] = particleswarm(objFunc,methods,lb,ub, options);   
     end
 end
 
 function total_err = objectiveFunc(weight, forecast, target) % objective function
-    ensembleForecasted = sum(forecast.*weight, 2);  % add all methods
-    err1 = sum(abs(target - ensembleForecasted));
-    err2 = abs(1-sum(weight));
-    total_err = err1+100*err2;
+    % constraint: summation of the weights need to be from 0.09 to 1.01
+    if abs(1 - sum(weight)) > 0.01
+        err1 = 0;
+        err2 = 10^8 + abs(1 - sum(weight));   % dummy value
+    else
+    % Minimize the error between forecasted and target    
+        ensembleForecasted = sum(forecast.*weight, 2);  % add all methods
+        err1 = sum(abs(target - ensembleForecasted));
+        err2 = abs(1-sum(weight));
+    end
+    total_err = err1+100*err2; % err2 makes the summation of the weight be close to 1
 end

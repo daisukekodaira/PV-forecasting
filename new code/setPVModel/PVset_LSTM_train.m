@@ -1,8 +1,9 @@
 function PVset_LSTM_train(input,path)
 start_LSTM_train = tic;
 % PV prediction: LSTM Model Forecast algorithm
-%% LOAD DATA
-traindays=60;
+%% Get parameters
+Params = PVset_getParameters;
+traindays = Params.validDays;
 %% devide data (train,vaild)
 predata = input(end-48*traindays+1:end,[1:4 7:15]);
 meandata = mean(predata);
