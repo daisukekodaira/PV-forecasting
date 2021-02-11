@@ -1,7 +1,7 @@
 % Return the boundaries of confidence interval
-function [lwBound, upBound] = PVget_PI(ForecastData,yDetermPred,path)    
+function [lwBound, upBound] = PVget_PI(PV_ID,yDetermPred,path)    
     %% Load mat files
-    building_num = num2str(ForecastData(1,1));
+    building_num = num2str(PV_ID(1,1));
     load_name = '\PV_err_distribution_';
     load_name = strcat(path,load_name,building_num,'.mat');
     load(load_name,'-mat');

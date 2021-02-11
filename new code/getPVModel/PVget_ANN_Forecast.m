@@ -8,7 +8,7 @@ function target = PVget_ANN_Forecast(predictor,path)
     load_name = strcat(path,load_name,building_num,'.mat');
     load(load_name,'-mat');
     %% ForecastData
-    predictors=predictor(:,[1:4 7:13]);
+    predictors=predictor(:,[1:4 7:end]);
     predictors( ~any(predictors,2), : ) = []; 
     [time_steps, ~]= size(predictors);
    %% Forecast solar using ANN
@@ -24,7 +24,7 @@ function target = PVget_ANN_Forecast(predictor,path)
     end
     result_solar_ANN_premean = result_solar_ANN{1}+result_solar_ANN{2}+result_solar_ANN{3};
     result_solar_ANN_mean = max(result_solar_ANN_premean/3,0);
-    predictors(:,12)=result_solar_ANN_mean;
+    predictors(:,end+1)=result_solar_ANN_mean;
   %% Forecast PV using ANN
     % use ANN 3 times for reduce ANN's error
     for i_loop = 1:3
@@ -39,7 +39,7 @@ function target = PVget_ANN_Forecast(predictor,path)
     result_PV_ANN_premean = result_PV_ANN{1}+result_PV_ANN{2}+result_PV_ANN{3};
     result_PV_ANN_mean = max(result_PV_ANN_premean/3,0);   
     %% ResultingData File
-    ResultingData_ANN(:,1:12) = predictors(:,1:12);
-    ResultingData_ANN(:,13) = result_PV_ANN_mean;
-    target = ResultingData_ANN(1:time_steps,13);
+    ResultingData_ANN = predictors(:,1:end);
+    ResultingData_ANN(:,end+1) = result_PV_ANN_mean;
+    target = ResultingData_ANN(1:time_steps,end);
 end

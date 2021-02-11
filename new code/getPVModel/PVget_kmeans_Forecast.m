@@ -6,8 +6,8 @@ load_name = strcat(path,load_name,building_num,'.mat');
 load(load_name,'-mat');
 %% normalize
 % Data such as time, irradiation, etc. have high variance. so i normalize
-ForecastData=forecastData(:,[1:4 7:13]);
-dataForecastnormalize = (ForecastData(:,7:11) - min_value(1:5)) ./ (max_value(1:5) - min_value(1:5));
+ForecastData=forecastData(:,[1:4 7:end]);
+dataForecastnormalize = (ForecastData(:,7:end) - min_value(1:end-1)) ./ (max_value(1:end-1) - min_value(1:end-1));
 dataForecastnormalize = horzcat(ForecastData(:,1:6),dataForecastnormalize);
 %% Forecast solarlrradiance
 % There is no solar irradiance data so i predict solar data using k-means
@@ -17,7 +17,7 @@ predictorArray = horzcat(TempArray(:,[3 5 6]),TempArray(:,predictor_sun));      
 predict_label_nb_sunlight = nb_sunlight.predict(predictorArray);     % Find solar's idex using Bayesian
 result_nb_sunlight = c_sunlight(predict_label_nb_sunlight,:);        % Find solar irradiance using solar's idex
 dataForecastnormalize = horzcat(dataForecastnormalize,result_nb_sunlight); % Make a new forecast data
-ForecastData(:,12)=(max_value(6) - min_value(6)).*result_nb_sunlight + min_value(6);       % Return normalize data back to real value.
+ForecastData(:,end+1)=(max_value(end) - min_value(end)).*result_nb_sunlight + min_value(end);       % Return normalize data back to real value.
 %% Patterning ForecastData
 % In PV forecast, it is much better to use patterned data
 % Count day number -> (0~23: 1 day), (8~7: 2 days)
@@ -27,9 +27,7 @@ j = 1;k=1;
 for i = 1:m_ForecastData
     patterned_Forecastdata(j,1)=dataForecastnormalize(2,1);
     patterned_Forecastdata(j,3)=max(dataForecastnormalize(i,7));
-    patterned_Forecastdata(j,4)=mean(dataForecastnormalize(k:i,8));
-    patterned_Forecastdata(j,5)=max(dataForecastnormalize(i,9));
-    patterned_Forecastdata(j,6:8)=mean(dataForecastnormalize(k:i,10:12));
+    patterned_Forecastdata(j,4:6)=mean(dataForecastnormalize(k:i,8:end));
     mon=(dataForecastnormalize(i,3) + round(dataForecastnormalize(i,4)/30));
     if mon >= 12 || mon < 3  %Winter
         patterned_Forecastdata(j,2) = 1;

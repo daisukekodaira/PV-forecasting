@@ -1,43 +1,29 @@
-% -----------------------------------------------------------------
-% This function is only for debugging
-% -------------------------------------------------------------------
-function PVget_graph_desc(x, y_pred, y_true, boundaries, name, max_xtime)     
-    %% CHANGE hour and value
-    %     if you want see  0 to 23 graph 
-    t=0;   
-    for i=1:size(x,1)
-           t=t+1;
-           if x(i) == max_xtime 
-               set_point=t;           
-           end
-    end
-    x1=zeros(size(x)); % chage x of form (0~23 hour)
-    x1(end-set_point+1:end,1)=x(1:set_point);
-    x1(1:end-set_point,1)=x(set_point+1:end); 
-    y_pred1=zeros(size(y_pred));% chage y_pred of form (0~23 hour)
-    y_pred1(end-set_point+1:end,1)=y_pred(1:set_point);
-    y_pred1(1:end-set_point,1)=y_pred(set_point+1:end);
-    y_true1=zeros(size(y_true));
-    y_true1(end-set_point+1:end,1)=y_true(1:set_point);
-    y_true1(1:end-set_point,1)=y_true(set_point+1:end);% chage y_true of form (0~23 hour)   
+function PVget_graph_desc(x, y_pred,y_pred_4, y_true, boundaries_1, boundaries_2,name)     
     %% Graph description for prediction result 
     f = figure;
     hold on;
-    plot(x, y_pred,'g','LineWidth',1);
-    if isempty(y_true) == 0
-        plot(x, y_true,'r','LineWidth',1);
-    else
-        plot(zeros(x,1),'LineWidth',1);
+    p1=plot(x, y_pred,'g','LineWidth',1);
+    if isempty(y_pred_4) == 0
+        p2=plot(x, y_pred_4,'b','LineWidth',1);
     end
-    if isempty(boundaries) == 0
-        boundaries1=zeros(size(boundaries));
-        boundaries1(end-set_point+1:end)=boundaries(1:set_point);
-        boundaries1(1:end-set_point)=boundaries(set_point+1:end);% chage boundaries of form (0~23 hour)
-        plot(x,boundaries(:,1),'b--','LineWidth',0.7);
-        plot(x,boundaries(:,2),'b--','LineWidth',0.7);
+    if isempty(y_true) == 0
+        p3=plot(x, y_true,'r','LineWidth',1);
+    end
+    if isempty(boundaries_1) == 0
+        p4=plot(x,boundaries_1(:,1),'m--','LineWidth',0.7);
+        p5=plot(x,boundaries_1(:,2),'m--','LineWidth',0.7);
+    end
+    if isempty(boundaries_2) == 0
+        p6=plot(x,boundaries_2(:,1),'c--','LineWidth',0.7);
+        p7=plot(x,boundaries_2(:,2),'c--','LineWidth',0.7);
     end
     xlabel('Time [h]');
     ylabel('Generation [kW]');
     title(name);
-    legend('predicted Load', 'True', ' Prediction Interval');
+    if isempty(boundaries_1) == 0 && isempty(boundaries_2) == 0
+        legend([p1,p2,p3,p4,p6,p5,p7],'predicted Load without optical flow', 'predicted Load with optical flow','True','Prediction Interval(without optical flow)','Prediction Interval(with optical flow)');
+    else
+        legend('predicted Load', 'True', 'Prediction Interval');
+    end
+    hold off;
 end
