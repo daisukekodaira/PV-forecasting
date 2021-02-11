@@ -24,7 +24,8 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData)
     for n=1:row_pre/48
         predictors([48*n-47:48*n],5)=transpose([0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7 8 8 9 9 10 10 11 11 12 12 13 13 14 14 15 15 16 16 17 17 18 18 19 19 20 20 21 21 22 22 23 23]) ;
     end
-    for PV_ID=15:27
+    first_ID = 1;
+    for PV_ID=first_ID:27
         i=1;
         k=1;
         for n=1:row_i
@@ -90,7 +91,13 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData)
                    xtime(i)=xtime(i)+24;
                 end
             end  
-            boundaries_3 =  [L_boundary_3, U_boundary_3];           
+            boundaries_3 =  [L_boundary_3, U_boundary_3];         
+            % display graph
+            Number=num2str(PV_ID);
+            Month=num2str(ForecastData(1,3));
+            day=num2str(ForecastData(1,4));
+            graphname_Combined=strcat('Combined the results ',Number,'(',Month,'/',day,')');
+            %PVget_graph_desc(xtime, yDetermPred3, observed ,boundaries_3, graphname_Combined, max_xtime);  
             % Cover Rate of PI (three method)
             count = 0;
             for i = 15:37
@@ -186,7 +193,7 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData)
             end
             RMSE(2)=sqrt(sum(SE(:,2))/48);           
             Data=horzcat(PV_ID,ForecastData(1,4),PICoverRate_3,PICoverRate_4,RMSE(1),RMSE(2),MAPE(1),MAPE(2));
-            if m==1 && PV_ID==15
+            if m==1 && PV_ID==first_ID
                 data=Data;
             else
                 data=vertcat(data,Data);
