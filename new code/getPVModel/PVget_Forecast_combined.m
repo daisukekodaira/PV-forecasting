@@ -20,7 +20,7 @@ function evaluation=PVget_Forecast_combined(predicted_PV,predictors,PV_ID,observ
         end
     end      
     % Get Interval
-    [L_boundary_3, U_boundary_3] = PVget_PI(PV_ID,yDetermPred3,filepath);
+    [L_boundary_3, U_boundary_3] = PVget_PI(PV_ID,yDetermPred3,predictors(:,5),filepath);
     boundaries_3 =  [L_boundary_3, U_boundary_3];  
     %% Make distribution of ensemble forecasting (four method)
     for hour = 1:24
@@ -43,7 +43,7 @@ function evaluation=PVget_Forecast_combined(predicted_PV,predictors,PV_ID,observ
          end
     end    
     % Get Interval
-    [L_boundary_4, U_boundary_4] = PVget_PI(PV_ID,yDetermPred4,filepath);
+    [L_boundary_4, U_boundary_4] = PVget_PI(PV_ID,yDetermPred4,predictors(:,5),filepath);
     boundaries_4 =  [L_boundary_4, U_boundary_4];  
     %% Display graph 
     Number=num2str(PV_ID);
