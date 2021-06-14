@@ -4,9 +4,14 @@ function evaluation=PVget_Forecast_combined(predicted_PV,predictors,PV_ID,observ
         buildingIndex = predictors(1,1);     
     %% Load mat files
         s1 = '\PV_pso_coeff_';
-        s2 = num2str(buildingIndex);
-        load_name = fullfile(filepath, [strcat(s1,s2) '.mat']);
-        load(load_name,'-mat');
+        s2 = '\PV_bound_';
+        s3 = num2str(buildingIndex);
+        name(1).string = strcat(s1,s3);
+        name(2).string = strcat(s2,s3);
+        for i=1:size(name,2)
+            load_name = fullfile(filepath, [name(i).string '.mat']);
+            load(load_name,'-mat');
+        end
     %% Get Deterministic prediction result  
     [~,numCols]=size(coeff(1,:));
     %% Make distribution of ensemble forecasting (three method)
@@ -20,7 +25,8 @@ function evaluation=PVget_Forecast_combined(predicted_PV,predictors,PV_ID,observ
         end
     end      
     % Get Interval
-    [L_boundary_3, U_boundary_3] = PVget_PI(PV_ID,yDetermPred3,filepath);
+    L_boundary_3 = lower;
+    U_boundary_3 = upper;
     boundaries_3 =  [L_boundary_3, U_boundary_3];  
     %% Make distribution of ensemble forecasting (four method)
     for hour = 1:24
@@ -43,7 +49,8 @@ function evaluation=PVget_Forecast_combined(predicted_PV,predictors,PV_ID,observ
          end
     end    
     % Get Interval
-    [L_boundary_4, U_boundary_4] = PVget_PI(PV_ID,yDetermPred4,filepath);
+    L_boundary_4 = lower; 
+    U_boundary_4 = upper;
     boundaries_4 =  [L_boundary_4, U_boundary_4];  
     %% Display graph 
     Number=num2str(PV_ID);

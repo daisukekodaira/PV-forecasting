@@ -59,34 +59,32 @@
             UB(48*i-47:48*i,1) = U_boundary(:,i);
             LB(48*i-47:48*i,1) = L_boundary(:,i);
         end
-        train_data = (pv_predict)';
+        train_data = horzcat(train_data(1:48*30,5),pv_predict)';
         boundary = horzcat(UB,LB);
-        pso_boundary = boundary(48*(m-1)+1:48*m,:);
         numFeatures = size(train_data,1); % Number of input layer
         numResponses = 2; % Number of output layer
-        ub1 = [2,0.8];
-        lb1 = [1.2,0];       
+        ub1 = [1,2,1,0.8];
+        lb1 = [0,1.2,0,0];       
         options_pso = optimoptions('particleswarm', 'MaxIterations',2500,'FunctionTolerance', 1e-25, 'MaxStallIterations', 2000,'Display', 'none','ObjectiveLimit',0.8);
         options = trainingOptions('adam', ...
             'MaxEpochs',1, ...
             'LearnRateSchedule','piecewise', ...
             'Verbose',0);        % training option
-        test_data = (y_est(:,m))';
         %% decide weight
-            objFunc = @(weight) objectiveFunc(weight, y_est(:,m));
+            objFunc = @(weight) objectiveFunc(weight, y_est(:,m),(train_data(1,1:48))');
             W = particleswarm(objFunc,numFeatures*2,lb1,ub1, options_pso);    % Weights between the input layer and the first hidden layer
-            Weight(1,:)=W(1);
-            Weight(2,:)=W(2);           
+            Weight(1,:)=W(1:2);
+            Weight(2,:)=W(3:4);           
             Layers = [ ...
                 sequenceInputLayer(numFeatures) 
                 fullyConnectedLayer(numResponses,'Weights',Weight)
                 regressionLayer]; 
             UBLB_net = trainNetwork(train_data,(boundary)',Layers,options);   % train           
         % function of PSO
-        function cwc = objectiveFunc(weight, Y_est) 
+        function cwc = objectiveFunc(weight, Y_est,time_data) 
             for k =1:size(Y_est,1)
-                UpBound(k,1) =  Y_est(k,1)*weight(1);
-                LwBound(k,1) =  Y_est(k,1)*weight(2);
+                UpBound(k,1) =  time_data(k,1)*weight(1)+Y_est(k,1)*weight(2);
+                LwBound(k,1) =  time_data(k,1)*weight(3)+Y_est(k,1)*weight(4);
             end
             for i=1:size(Y_est,1)
                 if UpBound(i,1)<0
