@@ -53,7 +53,7 @@
             end
         end
         PICP=count/n; % cover rate (30 days)       
-        [~,m]=max(PICP); 
+        [~,m]=max(PICP);         % Select Best performance day
         for i=1:30
             pv_predict(48*i-47:48*i,1) = y_est(:,i);
             UB(48*i-47:48*i,1) = U_boundary(:,i);

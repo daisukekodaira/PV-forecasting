@@ -1,4 +1,4 @@
-number,ID,year,month,day,time,Temp,Rain,CloudCover,generation,opticalflow
+number,ID,season,month,day,time,Temp,Rain,CloudCover,generation,opticalflow
 1,10000268,2,8,15,6.5,22.7,0,4,183.3564,NaN
 1,10000268,2,8,15,7,23.3,0,4,273.5392,NaN
 1,10000268,2,8,15,7.5,23.3,0,4,370.7744,NaN

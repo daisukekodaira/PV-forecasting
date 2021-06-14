@@ -6,8 +6,8 @@ function flag = PVModel(LongTermPastData)
     valid_day = 30;
     ci_percentage = 0.05;
     first_ID = 1;
-    season = 'summer'; % select season (spring  , summer , fall , winter )
-    region =  'few' ; % select region (kanto  , chubu , kansai ,few )
+    season = 'summer'; % select season (spring, summer, fall, winter)
+    region =  'few' ; % select region (kanto, chubu, kansai, few )
     %% Load data
     load_name = strcat(region,'_',season,'.csv');
     LongPastdata = readmatrix(load_name);
@@ -24,7 +24,8 @@ function flag = PVModel(LongTermPastData)
             LongPastdata(i,9) = 2; %% cloudy or rain
         end     
     end
-    longPastdata=horzcat(LongPastdata(:,[1 4:end])); 
+    longPastdata=horzcat(LongPastdata(:,[1 4:end]));
+    % Extract past data for each PV_ID
     for PV_ID=first_ID:longPastdata(end,1)
         Number=num2str(PV_ID);
         m=1;
@@ -34,21 +35,24 @@ function flag = PVModel(LongTermPastData)
                m=m+1;
             end
         end
+        % Define forecast rage from AM6:30 to PM5:00 in a day
+        % - Forecasted rsult from optical flow and observed generation is 
+        %   limited between 6:30AM and 5PM
         range = longPast(end,4)*2 - longPast(1,4)*2+1;
         % get err
         err_file_name = strcat('PV_err_',region,'_',season,'_',Number,'.mat');
         if isfile(err_file_name) == 0
             valid_data = longPast(end-range-train_day*range+1:end-range,1:end);
             train_data = longPast(end-range-(train_day+valid_day)*range+1:end-range-train_day*range,:);
-            PVerr_distribution(valid_data,train_data,valid_day,range,err_file_name,path);
+            PVerr_distribution(valid_data, train_data, valid_day, range, err_file_name, path);
         end
         for forecast_time = 1:range
             forecast_data = longPast(end-range+forecast_time,1:end-2);
             target_data = longPast(end-range+forecast_time,end-1:end);
             train_data = longPast(end-range+forecast_time-train_day*range+1:end-range+forecast_time-1,:);
         %% Train each model using past load data    
-            PVANN_Train(train_data, path);     
-            PVLSTM_train(train_data, path);
+            PVANN_Train(train_data, path);     % less than 1 sec
+            PVLSTM_train(train_data, path);     % less than 15 sec
         %% Validate the performance of each model 
             if forecast_time == 1
                 last_day = longPast(end-range+forecast_time-1,1:end-2);
@@ -60,13 +64,24 @@ function flag = PVModel(LongTermPastData)
             end
             y_ValidEstIndv(1).data(:,1) = PVANN_Forecast(forecast_data,  path);
             y_ValidEstIndv(2).data(:,1) = PVLSTM_Forecast(forecast_data, path);
-            y_ValidEstIndv(3).data(:,1) = target_data(2);            
+            y_ValidEstIndv(3).data(:,1) = target_data(2);
+            % Get the forecasted result from ensemble models
+            % - 1. Only machine learning
+            % - 2. Machine learing + Optical flow
             if forecast_time == 1
-                save_data = PV_combine(last_day_data(1:3), last_day_data(end),y_ValidEstIndv); 
+                getEnsembleForecast = getEnsembleForecast(last_day_data(1:3), last_day_data(end),y_ValidEstIndv); 
             else
-                save_data = PV_combine(forecast_1day(end,2:4), forecast_1day(end,end),y_ValidEstIndv); 
-            end           
-            result_forecast = horzcat(forecast_data(1,4),y_ValidEstIndv(1).data(1)/1000,y_ValidEstIndv(2).data(1)/1000,y_ValidEstIndv(3).data(1)/1000,save_data/1000,target_data(1)/1000);
+                getEnsembleForecast = getEnsembleForecast(forecast_1day(end,2:4), forecast_1day(end,end),y_ValidEstIndv); 
+            end
+            % Combine the all forecasted result into one matrix
+            % the original data unit is [W], so convert to [kW]
+            result_forecast = horzcat(forecast_data(1,4), ... % time
+                                                 y_ValidEstIndv(1).data(1)/1000, ... Forecasted result from ANN
+                                                 y_ValidEstIndv(2).data(1)/1000, ... Forecasted result from LSTM
+                                                 y_ValidEstIndv(3).data(1)/1000, ... Forecasted result from Optical flow
+                                                 getEnsembleForecast/1000, ... % Forecated result of ensemble models (2 cases)
+                                                 target_data(1)/1000); % observed data (target data)
+            % Append the new forecasted result on the existing table
             if forecast_time==1
                 forecast_1day = result_forecast;
             else
@@ -100,6 +115,7 @@ function flag = PVModel(LongTermPastData)
             clearvars save_data;
             clearvars result_forecast;
         end
+        % Terminal condition and save RMSE
         if PV_ID == longPastdata(end,1)
             save_name = strcat(region,'_',season,'_','RMSE');
             save(all_eva_data,save_name)
